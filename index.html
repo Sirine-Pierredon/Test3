@@ -1,0 +1,1463 @@
+<!DOCTYPE html>
+<!-- saved from url=(0047)file:///C:/Users/Sirine/Downloads/index_38.html -->
+<html lang="fr"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Abbaye de Pierredon — Tableau de bord</title>
+<link rel="preconnect" href="https://fonts.googleapis.com/">
+<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:wght@400;500;600;700&family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{
+  --bordeaux:#262019; --bordeaux-deep:#1A1611; --gold:#A8842B; --gold-soft:#D8C99E;
+  --rust:#A8481E; --yellow:#E0AE3A;
+  --ink:#2B2621; --muted:#8C867B; --olive:#6E7355;
+  --bg:#F5F4EF; --card:#FFFFFF; --line:#E7E4DC; --line-soft:#F0EEE7;
+  --pos:#4E6B3E; --neg:#A8481E;
+  --c-perdu:#9E3B1C; --c-nouv:#4E6B3E; --c-cro:#B0851F; --c-bai:#C2703B; --c-sta:#8A8578;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif;font-size:15px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding:0 22px}
+h1,h2,h3{font-family:"Bodoni Moda",Georgia,serif;font-weight:600;margin:0}
+.num{font-variant-numeric:tabular-nums}
+
+header.mast{background:radial-gradient(120% 140% at 50% -45%, rgba(176,133,31,.10), transparent 60%);border-bottom:2px solid var(--gold);position:relative}
+header.mast::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--yellow) 0%,var(--gold) 45%,var(--rust) 100%)}
+.masthead{padding:38px 22px 28px;text-align:center}
+.logo-text{margin:0 auto 4px;line-height:.92}
+.logo-text .l1,.logo-text .l3{font-family:"Cormorant Garamond",serif;font-weight:600;color:var(--gold);letter-spacing:.16em;font-size:clamp(34px,6vw,54px)}
+.logo-text .l2{font-family:"Cormorant Garamond",serif;font-weight:500;color:var(--ink);letter-spacing:.34em;font-size:clamp(11px,2vw,15px);margin:2px 0 1px}
+.logo-text .l4{font-family:Inter;font-weight:500;color:var(--rust);letter-spacing:.28em;text-transform:uppercase;font-size:clamp(9px,1.4vw,10.5px);margin-top:11px}
+.mast .rule{height:1px;width:120px;background:linear-gradient(90deg,transparent,var(--gold) 35%,var(--rust) 100%);margin:20px auto 16px}
+.mast .bigtitle{font-family:"Bodoni Moda",serif;font-size:clamp(26px,4.4vw,40px);line-height:1;color:var(--ink);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.mast .commerciale{font-family:Inter;font-weight:700;text-transform:uppercase;letter-spacing:.2em;font-size:clamp(12px,1.8vw,14px);color:var(--rust);margin-top:12px}
+.mast .periods{margin:8px auto 0;color:var(--muted);font-size:12.5px}
+
+.stage{padding:38px 0 60px}
+.intro{color:var(--muted);font-size:14.5px;max-width:640px;margin:0 0 22px}
+.drop{display:block;background:var(--card);border:1.5px dashed #DDD0A9;border-radius:14px;padding:34px 24px;text-align:center;cursor:pointer;transition:.16s}
+#filein{display:none}
+.drop:hover{border-color:var(--gold);background:#FFFDF6}
+.drop.over{border-color:var(--gold);background:#FDF6E7;border-style:solid}
+.drop .big{font-family:"Bodoni Moda",serif;font-size:20px;color:var(--ink)}
+.drop .sm{color:var(--muted);font-size:13px;margin-top:7px}
+.filelist{margin-top:18px;display:flex;flex-direction:column;gap:8px}
+.fileitem{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:11px 15px;font-size:13.5px}
+.fileitem .tag{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:20px;background:var(--line-soft);color:var(--gold)}
+.fileitem .tag.ok{background:#E7EFDD;color:var(--pos)}
+.fileitem .tag.no{background:#F3DCD3;color:var(--rust)}
+.fileitem .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink)}
+.actions{margin-top:24px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+button.go{background:var(--bordeaux);color:#F2E9CF;border:none;border-radius:10px;padding:14px 32px;font-family:Inter;font-size:15px;font-weight:600;cursor:pointer}
+button.go:disabled{opacity:.4;cursor:not-allowed}
+button.ghost{background:none;border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:12px 22px;font-weight:600;cursor:pointer}
+.status{color:var(--muted);font-size:13.5px}
+.status.err{color:var(--neg);font-weight:600}
+
+.results{display:none;padding:30px 0 80px}
+.results.show{display:block}
+.sec{margin-top:44px}
+.sec:first-child{margin-top:0}
+.sec-h{display:flex;align-items:baseline;gap:12px;margin-bottom:16px;border-left:4px solid var(--gold);padding-left:12px}
+.sec-h h2{font-size:23px}
+.sec-h .note{color:var(--muted);font-size:12.5px}
+
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+@media(max-width:820px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:18px 18px 15px;position:relative;overflow:hidden}
+.kpi::after{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:var(--gold)}
+.kpi.big{grid-column:span 2;background:linear-gradient(180deg,#FFFDF7,#FBF6EA)}
+@media(max-width:820px){.kpi.big{grid-column:span 2}}
+.kpi .l{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.kpi .v{font-family:"Bodoni Moda",serif;font-size:30px;font-weight:600;margin-top:7px;line-height:1}
+.kpi .s{font-size:12.5px;margin-top:7px;font-weight:600}
+.pos{color:var(--pos)} .neg{color:var(--neg)}
+
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:13px;background:var(--card)}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{padding:9px 12px;text-align:right;white-space:nowrap}
+th{background:#F1EEE6;color:var(--ink);font-weight:600;font-size:11px;letter-spacing:.05em;text-transform:uppercase;text-align:right;border-bottom:1.5px solid var(--gold)}
+th:first-child,td:first-child{text-align:left}
+td.l,th.l{text-align:left}
+tbody tr:nth-child(even){background:#FAF9F5}
+tbody tr:hover{background:#F2F0E9}
+.sub td{font-weight:700;background:#EFEBDF;border-top:1.5px solid var(--gold);border-bottom:1px solid var(--line)}
+.tot td{font-weight:700;background:var(--bordeaux);color:#F1E8D4;border-top:2px solid var(--gold)}
+.macro td{background:var(--bordeaux-deep);color:var(--gold-soft);font-weight:600;font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+.chip{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11.5px;font-weight:600}
+.chip.perdu{background:#F3D9D2;color:var(--c-perdu)} .chip.nouv{background:#DDE6D0;color:var(--c-nouv)}
+.chip.cro{background:#F1E2C2;color:var(--c-cro)} .chip.bai{background:#F2DECB;color:var(--c-bai)} .chip.sta{background:#E5E3DC;color:#5E5A50}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.fchip{border:1px solid var(--line);background:var(--card);border-radius:20px;padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer;color:var(--muted)}
+.fchip.on{background:var(--bordeaux);color:#EFE0BC;border-color:var(--bordeaux)}
+.search{margin-left:auto;border:1px solid var(--line);border-radius:10px;padding:9px 13px;font-size:13.5px;min-width:200px}
+
+.bar-row{display:grid;grid-template-columns:150px 1fr 92px;align-items:center;gap:14px;padding:7px 0}
+@media(max-width:600px){.bar-row{grid-template-columns:110px 1fr 78px}}
+.bar-row .cn{font-weight:600;font-size:13.5px}.bar-row .cn small{display:block;color:var(--muted);font-weight:400;font-size:11px}
+.track{background:var(--line-soft);border-radius:6px;height:15px;overflow:hidden}
+.fill{height:100%;border-radius:6px}
+.fill.Blanc{background:var(--gold-soft)}.fill.Rouge{background:var(--bordeaux)}.fill.Rosé{background:#D08A86}.fill.g{background:var(--gold)}.fill.r{background:var(--rust)}
+.bar-row .qt{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;font-size:13.5px}
+.aging{display:flex;height:26px;border-radius:8px;overflow:hidden;border:1px solid var(--line)}
+.aging span{display:flex;align-items:center;justify-content:center;font-size:10.5px;color:#fff;font-weight:600;min-width:0;overflow:hidden}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:760px){.grid2{grid-template-columns:1fr}}
+.soon{background:var(--card);border:1px dashed var(--line);border-radius:12px;padding:16px 18px;color:var(--muted);font-size:13px}
+footer{border-top:1px solid var(--line);padding:24px 0;color:var(--muted);font-size:12.5px}
+footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.dl{background:var(--rust);color:#FBF1E4;border:none;border-radius:10px;padding:13px 26px;font-weight:600;cursor:pointer}
+.spin{display:inline-block;width:15px;height:15px;border:2px solid var(--gold-soft);border-top-color:transparent;border-radius:50%;animation:sp .7s linear infinite;vertical-align:-2px;margin-right:7px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.alertes{display:flex;flex-direction:column;gap:0}
+.alert{display:flex;gap:11px;align-items:flex-start;padding:11px 4px;border-bottom:1px solid var(--line-soft);font-size:13.5px;line-height:1.45}
+.alert:last-child{border-bottom:none}
+.adot{flex:none;width:9px;height:9px;border-radius:50%;margin-top:5px}
+.tabs{display:flex;gap:2px;border-bottom:2px solid var(--gold);margin-bottom:26px;flex-wrap:wrap;position:sticky;top:0;background:var(--bg);z-index:5;padding-top:8px}
+.tab{appearance:none;border:none;background:none;padding:12px 20px;font-family:Inter;font-size:14.5px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;border-radius:9px 9px 0 0;transition:.14s;white-space:nowrap}
+.tab:hover{color:var(--ink);background:#FFFDF6}
+.tab.on{color:var(--rust);border-bottom-color:var(--rust)}
+.pane{display:none}
+.pane.on{display:block}
+.detrows{margin-top:11px;display:flex;flex-direction:column;gap:5px;font-size:12.5px;border-top:1px solid var(--line-soft);padding-top:9px}
+.detrows>div{display:flex;justify-content:space-between;align-items:baseline}
+.detrows span{color:var(--muted)}
+.vinsdet{margin-top:14px;border:1px solid var(--line);border-radius:13px;background:var(--card);overflow:hidden}
+.vinsdet>summary{list-style:none;cursor:pointer;padding:14px 18px;font-weight:600;font-size:13.5px;color:var(--rust);display:flex;align-items:center;gap:9px;user-select:none}
+.vinsdet>summary::-webkit-details-marker{display:none}
+.vinsdet>summary::before{content:"＋";font-weight:700;font-size:15px}
+.vinsdet[open]>summary::before{content:"–"}
+.vinsdet[open]>summary{border-bottom:1px solid var(--line)}
+.detwrap{padding:16px 18px}
+.detgrid{grid-template-columns:repeat(3,minmax(180px,1fr))}
+@media(max-width:760px){.detgrid{grid-template-columns:1fr}}
+
+.statrow{display:flex;gap:40px;flex-wrap:wrap;padding:2px 2px 22px}
+.statblk .sl{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.statblk .sv{font-family:"Bodoni Moda",serif;font-size:30px;font-weight:600;line-height:1.1;margin-top:4px}
+.statblk .ss{font-size:12px;color:var(--muted);margin-top:3px}
+.segbar{display:flex;height:9px;border-radius:5px;overflow:hidden;background:var(--line-soft)}
+.segbar span{display:block}
+.seglegend{display:flex;gap:20px;flex-wrap:wrap;margin-top:11px;font-size:12px;color:var(--muted)}
+.seglegend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.seglegend b{color:var(--ink)}.seglegend em{font-style:normal}
+.relhead{margin:26px 0 8px;font-family:"Bodoni Moda",serif;font-size:16px;color:var(--ink);display:flex;align-items:baseline;gap:10px}
+.relhead span{font-family:Inter;font-size:12px;color:var(--muted);font-weight:400}
+.rellist{display:flex;flex-direction:column}
+.rline{display:grid;grid-template-columns:230px 1fr 96px;align-items:center;gap:16px;padding:9px 4px;border-bottom:1px solid var(--line-soft)}
+.rline:last-child{border-bottom:none}
+.rc{font-weight:600;font-size:13.5px}
+.rc small{display:block;color:var(--muted);font-weight:400;font-size:11.5px;margin-top:1px}
+.rgauge{background:var(--line-soft);border-radius:5px;height:9px;overflow:hidden}
+.rfill{height:100%;border-radius:5px}
+.ramt{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;font-size:13.5px}
+@media(max-width:600px){.rline{grid-template-columns:130px 1fr 76px;gap:10px}.statrow{gap:24px}}
+.phare{border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-top:16px;background:var(--card)}
+.phare-h{display:flex;align-items:center;gap:12px;padding:12px 18px;color:#fff}
+.phare-h.Blanc{color:var(--ink)}
+.phare-h .pname{font-family:"Bodoni Moda",serif;font-size:19px;font-weight:600}
+.phare-h .pcolor{font-size:11px;text-transform:uppercase;letter-spacing:.1em;opacity:.85}
+.phare-h .ptot{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:700;font-size:17px}
+.phare-cols{display:grid;grid-template-columns:1fr 1fr;gap:26px;padding:16px 18px}
+@media(max-width:760px){.phare-cols{grid-template-columns:1fr;gap:18px}}
+.pcap{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:8px}
+.pcap span{text-transform:none;letter-spacing:0;font-weight:400}
+.oldtag{font-size:10px;background:#F3DCD3;color:var(--rust);border-radius:10px;padding:1px 7px;font-weight:600;vertical-align:1px}
+.phare-body{padding:6px 16px 10px}
+.mil{border-top:1px solid var(--line-soft)}
+.mil>summary{list-style:none;cursor:pointer;padding:10px 4px;display:flex;align-items:center;gap:14px;font-size:13.5px}
+.mil>summary::-webkit-details-marker{display:none}
+.mil>summary::before{content:"▸";color:var(--gold);font-size:11px;flex:none}
+.mil[open]>summary::before{content:"▾"}
+.mil .myr{font-weight:700;min-width:88px}
+.mil .msum{color:var(--muted);font-size:12.5px}
+.millist{max-height:290px;overflow:auto;margin:0 0 12px;border:1px solid var(--line);border-radius:9px}
+.millist table{font-size:13px}
+.millist thead th{position:sticky;top:0;z-index:1}
+</style>
+</head>
+<body>
+
+<header class="mast">
+  <div class="wrap masthead">
+    <div class="logo-text" role="img" aria-label="Abbaye Sainte-Marie de Pierredon — Saint-Rémy de Provence">
+      <div class="l1">ABBAYE</div><div class="l2">SAINTE-MARIE DE</div><div class="l3">PIERREDON</div>
+      <div class="l4">Saint-Rémy de Provence</div>
+    </div>
+    <div class="rule"></div>
+    <div class="bigtitle">Tableau de bord</div>
+    <div class="commerciale">Analyse commerciale</div>
+    <div class="periods" id="periods">Déposez vos exports pour lancer l'analyse</div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="stage" id="stage">
+    <p class="intro">Chargez un ou plusieurs exports (analyse clients, ventes par cuvée, encours, commandes, réservations, huile d'olive…). Chaque fichier est reconnu automatiquement et alimente le module correspondant. Traitement confidentiel, entièrement local.</p>
+    <label class="drop" id="drop">
+      <div class="big">Déposez vos fichiers PDF ici</div>
+      <div class="sm">ou cliquez pour les choisir — vous pouvez en sélectionner plusieurs</div>
+      <input type="file" accept="application/pdf,.pdf" multiple="" hidden="" id="filein">
+    </label>
+    <div class="filelist" id="filelist"></div>
+    <div class="actions">
+      <button class="go" id="btn-go" disabled="">Analyser</button>
+      <span class="status" id="status"></span>
+    </div>
+  </section>
+
+  <section class="results" id="results">
+    <nav class="tabs" id="tabs"><button class="tab on" data-tab="synthese">Synthèse</button><button class="tab" data-tab="clients">Clients</button><button class="tab" data-tab="ventes">Ventes</button><button class="tab" data-tab="prev">Prévisions</button><button class="tab" data-tab="stock">Stock</button></nav>
+    <div id="pane-synthese" class="pane on"></div>
+    <div id="pane-clients" class="pane"></div>
+    <div id="pane-ventes" class="pane on"></div>
+    <div id="pane-prev" class="pane"></div>
+    <div id="pane-stock" class="pane"></div><div id="pane-fidelite" class="pane"></div>
+    <div class="actions" style="margin-top:34px">
+      <button class="dl" id="btn-dl" style="display:none">Télécharger l'analyse Excel</button>
+      <button class="ghost" id="btn-reset" style="display:none">Analyser d'autres fichiers</button>
+    </div>
+  </section>
+</main>
+
+<footer><div class="wrap"><span id="foot"></span><span>Traitement 100 % local · aucune donnée transmise</span></div></footer>
+
+<script type="module">
+import * as pdfjsLib from "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.mjs";
+pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.mjs";
+
+/* ============ Helpers ============ */
+const NUM=/^-?\d[\d\u00a0 ]*(?:,\d+)?$/;
+const toNum=t=>{const v=parseFloat(String(t).replace(/[\u00a0 ]/g,'').replace(',','.'));return isNaN(v)?null:v;};
+const isSubseq=(sub,s)=>{let i=0;for(const c of s){if(c===sub[i])i++;if(i===sub.length)return true;}return false;};
+const isTotalLabel=l=>isSubseq('TOTAL',[...l.toUpperCase()].filter(c=>/[A-Z]/.test(c)).slice(0,12).join(''));
+const CUVEES=['DONNA ROSA','ESTRAVAGANZA','INITIUM','LUNA PLENA','NATURALIS','PRIMA LUCE','ULTIMA LAUDE','VESPRO','Z-MERLOT'];
+const COLOR={'LUNA PLENA':'Blanc','PRIMA LUCE':'Blanc','ULTIMA LAUDE':'Blanc','INITIUM':'Rouge','NATURALIS':'Rouge','VESPRO':'Rouge','Z-MERLOT':'Rouge','DONNA ROSA':'Rosé','ESTRAVAGANZA':'Rosé'};
+
+function pageLines(items){
+  const its=items.filter(i=>i.s.trim()!=='').map(i=>({s:i.s,x:i.x,y:i.y}));
+  its.sort((a,b)=>b.y-a.y||a.x-b.x);
+  const L=[];let cur=null;
+  for(const it of its){if(cur&&Math.abs(it.y-cur.y)<3)cur.toks.push(it);else{cur={y:it.y,toks:[it]};L.push(cur);}}
+  return L.map(l=>({x0:l.toks[0].x,toks:l.toks.sort((a,b)=>a.x-b.x).map(t=>t.s)}));
+}
+async function pdfToPages(file){
+  const doc=await pdfjsLib.getDocument({data:new Uint8Array(await file.arrayBuffer())}).promise;
+  const pages=[];
+  for(let p=1;p<=doc.numPages;p++){const tc=await(await doc.getPage(p)).getTextContent();pages.push(tc.items.map(i=>({s:i.str,x:i.transform[4],y:i.transform[5]})));}
+  return pages;
+}
+const flat=pages=>pages.flatMap(pg=>pageLines(pg).map(l=>l.toks));
+const pageText=pages=>(pages[0]||[]).map(i=>i.s).join(' ');
+
+/* ============ Détection type ============ */
+function detectType(pages){
+  const t=pageText(pages);
+  if(/Liste des documents/i.test(t)) return 'relances';
+  if(/Balance\s+[aâ]g[eé]e/i.test(t)) return 'encours';
+  if(/statistiques\s+commandes/i.test(t)) return 'carnet';
+  if(/statistiques\s+r[eé]servations/i.test(t)) return 'resa';
+  if(/STAT\s*2\s*H\.?O/i.test(t)||/STAT\s*3[._]2\s*H\.?O/i.test(t)||/HUILE/i.test(t)) return 'huile';
+  if(/STAT\s*3\.1\.1/i.test(t)) return 'remise';
+  if(/STAT\s*3\.1\b/i.test(t)) return 'cuvees';
+  if(/STAT\s*3\.2\s*VINS/i.test(t)) return 'cuveesRep';
+  if(/STAT\s*3\.3/i.test(t)) return 'millesime';
+  if(/STAT\s*2\s*VINS/i.test(t)&&/FAMILLE/i.test(t)) return 'clients';
+  if(/STAT\s*1\s*VINS/i.test(t)) return 'clients1';
+  if(/[EÉ]tat\s+des\s+stocks/i.test(t)&&/Huile d'olive/i.test(t)) return 'stockho';
+  if(/Quantit[eé]\s+disponible/i.test(t)||/[EÉ]tat\s+des\s+stocks/i.test(t)) return 'stock';
+  return 'inconnu';
+}
+const TYPE_LABEL={clients:'Analyse clients (STAT2)',clients1:'Clients (STAT1)',cuvees:'Ventes par cuvée',cuveesRep:'Cuvée × canal',remise:'Prix & remises',millesime:'Par millésime',encours:'Encours clients',relances:'Encours (relances)',carnet:'Carnet de commandes',resa:'Réservations',huile:"Huile d'olive",stock:'Stock',stockho:'Stock huile',budget:'Budget 2026',ventes:'Ventes détaillées',particuliers:'Particuliers (historique)',inconnu:'Non reconnu'};
+const SUPPORTED=new Set(['clients','cuvees','cuveesRep','encours','relances','carnet','resa','huile','stock','stockho','budget','ventes','particuliers']);
+
+/* ============ Parseurs ============ */
+// -- Clients (STAT2) : rep = en-tête de section --
+const FAMILIES=['A-Cavistes','B-Hotels-Restaurants','C-Distributeurs','D-Importateur','E-Societes','F-Agents','G-Famille/Amis/Personnel','H-Particuliers'];
+const SKIP=['Edition du','Page','STAT','par famille','sur la','sur les','inclus','Du 01/01','du 01/01','Delta','Mt HT','MT HT','M Btes'];
+function parseStat2(pages){
+  const rows=[];let rep=null,fam=null;
+  for(const pg of pages)for(const {toks} of pageLines(pg)){
+    if(!toks.length)continue;const text=toks.join(' ').trim();
+    if(SKIP.some(p=>text.startsWith(p)))continue;
+    let n=0;for(let k=toks.length-1;k>=0;k--){if(NUM.test(toks[k]))n++;else break;}
+    if(n<12){if(FAMILIES.includes(text))fam=text;else if(text){rep=text;fam=null;}continue;}
+    const vals=toks.slice(-12).map(toNum);const label=toks.slice(0,-12).join(' ').trim();
+    if(isTotalLabel(label)||!label)continue;
+    rows.push({rep,fam,client:label,ca25:Math.round(vals[0]*100)/100,ca26:Math.round(vals[5]*100)/100});
+  }
+  return rows;
+}
+const CONS=new Set(['Caveau','Caveau Pro.','Site/Mail','Pas de représentant']);
+function analyse(rows){
+  rows=rows.filter(r=>!isTotalLabel(r.client));
+  const g={};for(const r of rows){(g[r.client]=g[r.client]||[]).push(r);}
+  const clients=[];
+  for(const name in g){const apps=g[name];
+    const ca25=Math.round(apps.reduce((s,a)=>s+a.ca25,0)*100)/100, ca26=Math.round(apps.reduce((s,a)=>s+a.ca26,0)*100)/100;
+    const pos=apps.filter(a=>a.ca26>0);const pool=pos.length?pos:apps,kf=pos.length?'ca26':'ca25';
+    const t=pool.reduce((m,a)=>a[kf]>m[kf]?a:m,pool[0]);
+    let note='';if(apps.length>1){const o=[...new Set(apps.map(a=>a.rep).filter(x=>x!==t.rep))].sort();note='consolidé (ex-'+o.join(', ')+')';}
+    const macro=CONS.has(t.rep)?'VENTE DIRECTE':(t.rep==='Export'?'EXPORT':'PRO');
+    let cat;if(ca25>0&&ca26<=0)cat='Non renouvelé';else if(ca25<=0&&ca26>0)cat='Nouveau';
+    else if(ca25>0&&ca26>0){const d=(ca26-ca25)/ca25;cat=d>0.2?'En croissance >20%':(d<-0.2?'En baisse >20%':'Stable (±20%)');}else cat='Inactif';
+    clients.push({canal:t.rep,fam:t.fam,client:name,ca25,ca26,note,macro,cat});
+  }
+  return clients.filter(c=>c.cat!=='Inactif');
+}
+// -- Cuvées (STAT3.1) --
+function parseCuvees(pages){
+  const res={};
+  for(const toks of flat(pages)){
+    const label=toks.filter(t=>!NUM.test(t)).join(' ').trim();
+    const m=/^Total (DONNA ROSA|ESTRAVAGANZA|INITIUM|LUNA PLENA|NATURALIS|PRIMA LUCE|ULTIMA LAUDE|VESPRO|Z-MERLOT)$/.exec(label);
+    if(!m)continue;
+    const nums=toks.filter(t=>NUM.test(t)).map(toNum);if(nums.length<8)continue;
+    const pc=(nums.length-2)/2;
+    res[m[1]]={ca25:nums[0],btes25:nums[1],ca26:nums[pc],btes26:nums[pc+1],color:COLOR[m[1]]};
+  }
+  return Object.keys(res).length?res:null;
+}
+// -- Cuvée × canal (STAT3.2) : buffer les "Total CUVÉE", flush au "Total <Rep>" --
+function parseStat32(pages){
+  const repM={};let buf=[];
+  for(const toks of flat(pages)){
+    const txt=toks.join(' ');
+    const m=/^Total (.+?)\s+(-?\d[\d\u00a0 ,.-]*)/.exec(txt);
+    if(!m)continue;
+    const label=m[1].trim();
+    const nums=toks.filter(t=>NUM.test(t)).map(toNum);
+    if(nums.length<3)continue;
+    if(CUVEES.includes(label)){buf.push({cuvee:label,caN1:nums[0],caN:nums[3]!=null?nums[3]:0});}
+    else{const r=label;repM[r]=repM[r]||{};
+      for(const b of buf){const o=repM[r][b.cuvee]=repM[r][b.cuvee]||{caN1:0,caN:0};o.caN1+=b.caN1;o.caN+=b.caN;}
+      buf=[];}
+  }
+  return Object.keys(repM).length?repM:null;
+}
+// -- Huile (STAT2_HO / STAT3_2_HO) --
+function parseHuile(pages){
+  const L=flat(pages);let line=null;
+  for(const toks of L){if(/TOTAL FINAL/i.test(toks.join(' '))){line=toks;break;}}
+  if(!line){for(const toks of L){if(toks.filter(t=>!NUM.test(t)).join(' ').trim()==='Total')line=toks;}}
+  if(!line)return null;
+  const nums=line.filter(t=>NUM.test(t)).map(toNum);if(nums.length<6)return null;
+  const pc=(nums.length-2)/2;return {ca25:nums[0],ca26:nums[pc]};
+}
+// -- Carnet / Réservations --
+function parseDocFinal(pages){
+  const byCuvee={};let grand=null;const L=flat(pages);
+  for(const toks of L){const txt=toks.join(' ');
+    const m=/TOTAL Cuv[eé]e - Lib\s*:\s*(.+?)\s+([\d\u00a0 ,]+)\s+([\d\u00a0 ,]+)$/.exec(txt);
+    if(m){const cu=m[1].trim().toUpperCase();const mt=toNum(m[2]);if(mt!=null)byCuvee[cu]=(byCuvee[cu]||0)+mt;}
+  }
+  for(let i=L.length-1;i>=0;i--){const letters=L[i].join('').replace(/[^A-Za-zÀ-ÿ]/g,'');
+    const nums=L[i].filter(t=>NUM.test(t)).map(toNum);
+    if(letters===''&&nums.length>=2){grand=nums;break;}}
+  const total=grand?grand[1]:Object.values(byCuvee).reduce((s,v)=>s+v,0);
+  const eq75=grand?grand[grand.length-1]:null;
+  return {total,eq75,byCuvee};
+}
+// -- Encours (Balance âgée) --
+function parseEncours(pages){
+  let agg=null;const clients=[];
+  for(const toks of flat(pages)){const txt=toks.join(' ');
+    if(/^Total (type de tiers|g[eé]n[eé]ral)/i.test(txt)){const nums=toks.filter(t=>NUM.test(t)).map(toNum);if(nums.length>=7)agg=nums.slice(-7);}
+    else{const nums=toks.filter(t=>NUM.test(t)).map(toNum);
+      if(nums.length>=1){const label=toks.filter(t=>!NUM.test(t)).join(' ').trim();
+        if(label&&!/^(Type de tiers|Tiers|Total|Edit|Balance|Description|Filtres|Date|P[eé]riodicit|Factures|Soci)/i.test(label)){
+          const words=label.split(' ');const name=words.slice(1).join(' ')||label; // retire le code tiers
+          clients.push({label:name,total:nums[nums.length-1]});}}}
+  }
+  return {agg,clients};
+}
+// -- Stock 75cl --
+const FMTS=['EN 75 CL','Magnum','Jéroboam','Impériale','EN 12 L','VRAC','Vrac'];
+const COLW={'BLANC':'Blanc','ROUGE':'Rouge','ROSÉ':'Rosé','ROSE':'Rosé'};
+function parseRelances(pages){
+  const ed=pageText(pages).match(/Edition du\s+(\d{2})\/(\d{2})\/(\d{4})/);
+  const ref=ed?new Date(+ed[3],+ed[2]-1,+ed[1]):new Date();
+  const DATE=/^(\d{2})\/(\d{2})\/(\d{2})$/;
+  const rows=[];
+  for(const pg of pages)for(const {toks} of pageLines(pg)){
+    const m=DATE.exec(toks[0]);if(!m)continue;
+    const nums=[];for(let i=toks.length-1;i>=0&&nums.length<4;i--){if(NUM.test(toks[i]))nums.unshift(toNum(toks[i]));else break;}
+    if(nums.length<4)continue;
+    const solde=nums[3];const numStart=toks.length-4;
+    const addr=toks.slice(3,numStart).join(' ');const client=(addr.split(' - ')[0]||addr).trim()||addr;
+    rows.push({date:new Date(2000+ +m[3],+m[2]-1,+m[1]),client,solde});
+  }
+  const ageD=d=>Math.round((ref-d)/86400000);
+  // retard = nombre de jours APRÈS l'échéance (échéance = date facture + 30 j net)
+  for(const r of rows){r.age=ageD(r.date);r.retard=r.age-30;}
+  const echus=rows.filter(r=>r.retard>0), non=rows.filter(r=>r.retard<=0);
+  const OB=[["0 à 30 j",0,30,'#6E7355'],["31 à 60 j",30,60,'#8A7A2E'],["61 à 90 j",60,90,'#A8842B'],["91 à 120 j",90,120,'#C2703B'],["121 j à 1 an",120,365,'#A8481E'],["1 an et 1 j à 2 ans",365,730,'#8A3416'],["2 ans et plus",730,1e9,'#7A2410']];
+  const ocol=ret=>{for(const b of OB){if(ret>b[1]&&ret<=b[2])return b[3];}return '#7A2410';};
+  const buckets=OB.map(b=>{const it=echus.filter(r=>r.retard>b[1]&&r.retard<=b[2]);return {lab:b[0],col:b[3],count:it.length,total:it.reduce((s,r)=>s+r.solde,0),echu:true};});
+  const nonTotal=non.reduce((s,r)=>s+r.solde,0);
+  const tranches=[{lab:'Non échus',col:'#C9C4B5',count:non.length,total:nonTotal,echu:false},...buckets];
+  const total=echus.reduce((s,r)=>s+r.solde,0);
+  const byC={};echus.forEach(r=>{const o=byC[r.client]=byC[r.client]||{total:0,count:0,oldest:0};o.total+=r.solde;o.count++;o.oldest=Math.max(o.oldest,r.retard);});
+  Object.values(byC).forEach(o=>o.col=ocol(o.oldest));
+  const non2=non.slice().sort((a,b)=>b.solde-a.solde);
+  const pad=n=>('0'+n).slice(-2);
+  const list=echus.map(r=>({client:r.client,date:r.date,solde:r.solde,age:r.age,retard:r.retard,col:ocol(r.retard)})).sort((a,b)=>b.solde-a.solde);
+  return {ref:pad(ref.getDate())+'/'+pad(ref.getMonth()+1)+'/'+ref.getFullYear(),buckets,tranches,total,byC,list,nonCount:non.length,nonTotal,nonTop:non2.slice(0,3)};
+}
+
+function parseStock(pages){
+  const stock={};let color=null,fmt=null;
+  for(const pg of pages)for(const {x0,toks} of pageLines(pg)){
+    const text=toks.join(' ').trim();const first=text.split(' (en')[0].trim();
+    if(x0>282&&COLW[first.toUpperCase()]){color=COLW[first.toUpperCase()];continue;}
+    if(x0>255&&FMTS.some(f=>first.startsWith(f))&&!text.includes('(en qté)')){fmt=first.startsWith('EN 75 CL')?'EN 75 CL':'autre';continue;}
+    if(text.includes('(en qté)')){const cuv=CUVEES.find(c=>text.startsWith(c));
+      if(cuv&&fmt==='EN 75 CL'){const nums=toks.filter(t=>NUM.test(t)).map(toNum);if(nums.length>=4){const fin=nums[nums.length-1];if(!stock[cuv])stock[cuv]={color:COLOR[cuv]||color||'Rouge',dispo:0};stock[cuv].dispo+=fin;}}}
+  }
+  return Object.keys(stock).length?stock:null;
+}
+function parseStockHO(pages){
+  const items=[];let sect=null,pend=null;
+  for(const pg of pages)for(const {toks} of pageLines(pg)){
+    const t=toks.join(' ').trim();
+    if(/^(Divers|Huile d'olive|miel|Vrac|Coffrets?)$/i.test(t)){if(pend){items.push(pend);pend=null;}sect=t.toLowerCase();continue;}
+    if(sect!=="huile d'olive")continue;
+    if(/HUILE/i.test(t)){if(pend)items.push(pend);const nums=toks.filter(x=>NUM.test(x)).map(toNum);const words=toks.filter(x=>!NUM.test(x)).join(' ').replace(/HUILE D'OLIVE/gi,'').trim();pend={label:words,qty:nums.length?nums[nums.length-1]:0};}
+    else if(pend){pend.label=(pend.label+' '+t).trim();}
+  }
+  if(pend)items.push(pend);
+  return items.map(it=>{const l=it.label;const mill=(l.match(/20\d{2}/)||[''])[0];let cond='Non précisé';const cl=l.match(/(\d+)\s*CL/i),li=l.match(/(\d+)\s*L\b/i);
+    if(/BOUTEILLE/i.test(l))cond='Bouteille '+(cl?cl[1]+' cl':'');else if(/BIDON/i.test(l))cond='Bidon '+(cl?cl[1]+' cl':(li?li[1]+' L':''));else if(/FLACON/i.test(l))cond='Flacon '+(cl?cl[1]+' cl':'');else if(cl)cond=cl[1]+' cl';else if(li)cond=li[1]+' L';
+    return {millesime:mill,conditionnement:cond.trim(),qty:it.qty};}).filter(x=>x.qty!==0);
+}
+function extractPeriods(pages){
+  const m=pageText(pages).match(/du\s+(\d{2}\/\d{2}\/\d{4})\s+au\s+(\d{2}\/\d{2}\/\d{4})\s+et\s+(?:du|au)\s+(\d{2}\/\d{2}\/\d{4})\s+au\s+(\d{2}\/\d{2}\/\d{4})/);
+  return m?{curStart:m[1],curEnd:m[2],prevStart:m[3],prevEnd:m[4]}:null;
+}
+
+/* ============ Formatage ============ */
+const eur=v=>Math.round(v).toLocaleString('fr-FR')+' €';
+const eur0=v=>!v?'—':Math.round(v).toLocaleString('fr-FR')+' €';
+const int0=v=>!v?'—':Math.round(v).toLocaleString('fr-FR');
+const pct=v=>(v>=0?'+':'')+Math.round(v*100)+' %';
+const sign=v=>v>=0?'pos':'neg';
+const r2=v=>typeof v==='number'?Math.round(v*100)/100:v;
+
+/* ============ État & upload ============ */
+let picked=[]; // {file, type, pages}
+const DATA={};
+const $=id=>document.getElementById(id);
+function setStatus(m,e){const s=$('status');s.textContent=m;s.classList.toggle('err',!!e);}
+
+const drop=$('drop'),filein=$('filein');
+drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('over');});
+drop.addEventListener('dragleave',()=>drop.classList.remove('over'));
+drop.addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('over');addFiles(e.dataTransfer.files);});
+filein.addEventListener('change',e=>addFiles(e.target.files));
+
+async function addFiles(fl){
+  for(const f of fl){const nm=f.name.toLowerCase();
+    const isPdf=f.type==='application/pdf'||nm.endsWith('.pdf');
+    const isSheet=/\.(xlsx|xls|csv)$/.test(nm);
+    if(!isPdf&&!isSheet)continue;
+    let type=isSheet?'budget':'…';
+    if(nm.endsWith('.csv')){try{const txt=new TextDecoder('windows-1252').decode(await f.arrayBuffer());if(/Nom tiers/i.test(txt)&&/Mt HT/i.test(txt))type='ventes';}catch(e){}}
+    else if(/\.(xlsx|xls)$/.test(nm)){try{const wb=XLSX.read(await f.arrayBuffer(),{type:'array'});const h=(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1})[0]||[]).map(x=>String(x==null?'':x));if(h.some(c=>/Nom.*Client/i.test(c))&&h.some(c=>/Equivalent\s*75/i.test(c)))type='particuliers';}catch(e){}}
+    picked.push({file:f,type,pages:null,fy:false});}
+  renderFileList();
+  for(const e of picked){if(e.pages||e.type==='budget'||e.type==='ventes'||e.type==='particuliers')continue;
+    try{e.pages=await pdfToPages(e.file);e.type=detectType(e.pages);
+      const pr=extractPeriods(e.pages);
+      if((e.type==='cuvees'||e.type==='clients')&&pr&&/2025$/.test(pr.curEnd))e.fy=true;
+    }catch(err){e.type='inconnu';}
+    renderFileList();}
+  $('btn-go').disabled=!picked.some(e=>SUPPORTED.has(e.type));
+}
+function renderFileList(){
+  $('filelist').innerHTML=picked.map((e,i)=>{
+    const known=SUPPORTED.has(e.type);const cls=e.type==='…'?'':(known?'ok':'no');
+    return `<div class="fileitem"><span class="tag ${cls}">${TYPE_LABEL[e.type]||e.type}${e.fy?' · année 2025':''}</span>
+      <span class="nm">${e.file.name}</span>
+      <span style="cursor:pointer;color:var(--muted)" data-rm="${i}">✕</span></div>`;}).join('');
+  document.querySelectorAll('[data-rm]').forEach(el=>el.onclick=()=>{picked.splice(+el.dataset.rm,1);renderFileList();$('btn-go').disabled=!picked.some(e=>SUPPORTED.has(e.type));});
+}
+
+$('btn-go').addEventListener('click',run);
+$('btn-reset').addEventListener('click',()=>location.reload());
+$('btn-dl').addEventListener('click',exportExcel);
+
+async function run(){
+  $('btn-go').disabled=true;$('foot').innerHTML='<span class="spin"></span>Analyse en cours';
+  try{
+    for(const e of picked){
+      if(e.type==='budget'){DATA.budget=await parseBudget(e.file);continue;}
+      if(e.type==='ventes'){const v=await parseVentes(e.file);if(v)mergeVentes(v);mergeFidelite(await parseFidelite(e.file));continue;}
+      if(e.type==='particuliers'){DATA.particuliers=parseParticuliers(XLSX.read(await e.file.arrayBuffer(),{type:'array'}));continue;}
+      if(!e.pages)e.pages=await pdfToPages(e.file);
+      const t=e.type,pr=extractPeriods(e.pages);
+      if(t==='clients'){
+        if(e.fy){const fy=parseStat2(e.pages);DATA.canalFY={};for(const r of fy){if(isTotalLabel(r.client))continue;DATA.canalFY[r.rep]=(DATA.canalFY[r.rep]||0)+r.ca26;}}
+        else{DATA.clients=analyse(parseStat2(e.pages));DATA.periods=DATA.periods||pr;}
+      } else if(t==='cuvees'){const c=parseCuvees(e.pages);
+        if(e.fy){DATA.cuveesFY={};for(const k in c)DATA.cuveesFY[k]={ca:c[k].ca26,btes:c[k].btes26};}
+        else{DATA.cuvees=c;DATA.periods=DATA.periods||pr;}
+      }
+      else if(t==='cuveesRep')DATA.cuveesRep=parseStat32(e.pages);
+      else if(t==='huile')DATA.huile=parseHuile(e.pages);
+      else if(t==='carnet')DATA.carnet=parseDocFinal(e.pages);
+      else if(t==='resa')DATA.resa=parseDocFinal(e.pages);
+      else if(t==='relances')DATA.relances=parseRelances(e.pages);
+      else if(t==='encours')DATA.encours=parseEncours(e.pages);
+      else if(t==='stock')DATA.stock=parseStock(e.pages);
+      else if(t==='stockho')DATA.stockho=parseStockHO(e.pages);
+    }
+    computeForecast();
+    render();
+    $('stage').style.display='none';$('results').classList.add('show');
+    $('btn-dl').style.display='';$('btn-reset').style.display='';
+    $('foot').textContent='Analyse terminée';window.scrollTo({top:0,behavior:'smooth'});
+  }catch(err){setStatus(err.message||String(err),true);$('foot').textContent='Erreur';$('btn-go').disabled=false;}
+}
+
+/* ============ Synthèse par canal (clients) ============ */
+const PRO_ORDER=['Alpilles direct','Les Agapes (Alpilles)','Les Agapes (Alpilles) **','Arom Vins','Le Casier à vins','Les Agapes (Hors Alpilles)','Terroirs et vins nobles','La Carafe Bleue (13)','Promo','Clients en Direct','Clients en Direct 06','Clients en Direct 13','Clients en Direct 84'];
+const CONS_ORDER=['Caveau','Caveau Pro.','Site/Mail','Pas de représentant'];
+const EXP_ORDER=['Export'];
+const zeroS=()=>({perduN:0,perduCA:0,nouvN:0,nouvCA:0,croN:0,croCA:0,baiN:0,baiCA:0,staN:0,staCA:0,actifs:0,ca26:0,ca25:0,delta:0});
+const addS=(a,b)=>{const r={};for(const k in a)r[k]=a[k]+b[k];return r;};
+function chanStats(cl,canal){const s=zeroS();for(const c of cl){if(c.canal!==canal)continue;s.ca25+=c.ca25;s.ca26+=c.ca26;if(c.ca26>0)s.actifs++;
+  if(c.cat==='Non renouvelé'){s.perduN++;s.perduCA+=c.ca25;}else if(c.cat==='Nouveau'){s.nouvN++;s.nouvCA+=c.ca26;}
+  else if(c.cat==='En croissance >20%'){s.croN++;s.croCA+=c.ca26;}else if(c.cat==='En baisse >20%'){s.baiN++;s.baiCA+=c.ca26;}
+  else if(c.cat==='Stable (±20%)'){s.staN++;s.staCA+=c.ca26;}}s.delta=s.ca26-s.ca25;return s;}
+
+/* ============ Rendu ============ */
+function render(){
+  const P={synthese:$('pane-synthese'),clients:$('pane-clients'),ventes:$('pane-ventes'),prev:$('pane-prev'),stock:$('pane-stock'),fidelite:$('pane-fidelite')};
+  Object.values(P).forEach(p=>p.innerHTML='');
+  // --- Synthèse ---
+  P.synthese.innerHTML=renderSynthese();
+  if(DATA.fidelite)P.synthese.appendChild(section('Historique du CA vin','CA par année, empilé par macro-canal (PRO / Vente directe)',renderHistorique()));
+  {const al=renderAlertes();if(al)P.synthese.appendChild(section('Alertes opérationnelles','Générées automatiquement à partir des données',al));}
+  if(DATA.relances)P.synthese.appendChild(section('Encours & relances','Ancienneté par tranche de retard (30 j net) · non échus inclus',renderRelances()));
+  else if(DATA.encours)P.synthese.appendChild(section('Encours clients & recouvrement','Balance âgée des créances',renderEncours()));
+  // --- Clients ---
+  if(DATA.clients)P.clients.appendChild(section('Analyse clients par canal','Comparaison N vs N-1 · seuil ±20% · échanges consolidés',renderClients()));
+  if(DATA.particuliers)P.clients.appendChild(section('Deep-dive particuliers','Historique nominatif 2018→2026 · pays · cohortes · top clients · fiche « Particulier » agrégée exclue',renderParticuliers()));
+  // --- Fidélité ---
+  if(DATA.fidelite)P.fidelite.appendChild(section('Matrice de fidélité','Segmentation récence × fréquence · PRO & particuliers · à réactiver · plan géographique',renderFidelite()));
+  // --- Ventes ---
+  if(DATA.cuvees)P.ventes.appendChild(section('Ventes par cuvée','CA et bouteilles N vs N-1, mix par couleur',renderCuvees()));
+  if(DATA.ventes)P.ventes.appendChild(section('Nos cuvées de garde',"Produits phares · vieux millésimes à valoriser · clients fidèles",renderPhares()));
+  if(DATA.cuveesRep)P.ventes.appendChild(section('Cuvée × canal','CA de l\'année N ventilé par macro-canal · canal dominant par cuvée',renderCuveeCanal()));
+  if(DATA.huile)P.ventes.appendChild(section("Huile d'olive",'CA N vs N-1',renderHuile()));
+  if(DATA.carnet)P.ventes.appendChild(section('Carnet de commandes','Commandes en cours non facturées',renderDoc(DATA.carnet,'engagé')));
+  if(DATA.resa)P.ventes.appendChild(section('Réservations','Pipeline réservé',renderDoc(DATA.resa,'réservé')));
+  // --- Prévisions ---
+  if(DATA.fcCuvee)P.prev.appendChild(section('Prévision par cuvée',"Réel cumulé N + reste de l'année 2025 · SIM 1 / SIM 2",renderPrevCuvee()));
+  if(DATA.fcMacro)P.prev.appendChild(section('Prévision par macro-canal','Détail par canal · sous-totaux PRO / Consommateurs / Export',renderPrevCanal()));
+  if(DATA.fcCanal&&DATA.budget)P.prev.appendChild(section('Budget vs Prévision','Hiérarchie par canal · Budget vs SIM 1 · Réel 2025 & SIM 2',renderBudget()));
+  // --- Stock ---
+  if(DATA.stock&&DATA.cuvees)P.stock.appendChild(section('Couverture de stock 75 cl','Stock disponible vs rythme d\'écoulement',renderCouverture()));
+  else if(DATA.stock)P.stock.appendChild(section('Stock disponible 75 cl','Quantité disponible par cuvée',renderStockSimple()));
+  if(DATA.stockho)P.stock.appendChild(section("Stock huile d'olive",'Par conditionnement',renderStockHO()));
+  // --- Modules à venir (dans Synthèse) ---
+  const soon=picked.filter(e=>['millesime','remise','clients1'].includes(e.type));
+  if(soon.length)P.synthese.appendChild(section('Modules à venir','Fichiers reconnus, prochainement exploités',
+    `<div class="soon">${[...new Set(soon.map(e=>TYPE_LABEL[e.type]))].join(' · ')} — ces analyses (par millésime, prix/remises, etc.) seront ajoutées dans une prochaine itération.</div>`));
+  buildTabs(P);
+}
+function buildTabs(P){
+  const defs=[['synthese','Synthèse'],['clients','Clients'],['fidelite','Fidélité'],['ventes','Ventes'],['prev','Prévisions'],['stock','Stock']];
+  const tabs=$('tabs');tabs.innerHTML='';
+  const avail=defs.filter(([id])=>P[id]&&P[id].children.length);
+  const show=id=>{document.querySelectorAll('#tabs .tab').forEach(t=>t.classList.toggle('on',t.dataset.tab===id));
+    Object.entries(P).forEach(([pid,p])=>p.classList.toggle('on',pid===id));
+    if(id==='fidelite')setTimeout(initFidelite,0);};
+  avail.forEach(([id,lab],i)=>{const b=document.createElement('button');b.className='tab'+(i===0?' on':'');b.textContent=lab;b.dataset.tab=id;
+    b.onclick=()=>{show(id);window.scrollTo({top:0,behavior:'smooth'});};tabs.appendChild(b);});
+  if(avail.length)show(avail[0][0]);
+}
+function section(title,note,html){const s=document.createElement('div');s.className='sec';
+  s.innerHTML=`<div class="sec-h"><h2>${title}</h2><span class="note">${note}</span></div>`;
+  const d=document.createElement('div');d.innerHTML=html;s.appendChild(d);return s;}
+
+function renderKpis(){
+  const K=[];
+  let caN=null,caP=null;
+  if(DATA.cuvees){caN=Object.values(DATA.cuvees).reduce((s,v)=>s+v.ca26,0);caP=Object.values(DATA.cuvees).reduce((s,v)=>s+v.ca25,0);}
+  else if(DATA.clients){caN=DATA.clients.reduce((s,c)=>s+c.ca26,0);caP=DATA.clients.reduce((s,c)=>s+c.ca25,0);}
+  if(caN!=null){const d=caN-caP,dp=caP>0?d/caP:0;
+    K.push(`<div class="kpi big"><div class="l">Chiffre d'affaires vins (N)</div><div class="v num">${eur(caN)}</div><div class="s ${sign(d)}">${pct(dp)} vs N-1 · ${(d>=0?'+':'')+eur(d)}</div></div>`);}
+  if(DATA.fcCuvee||DATA.fcMacro){const src=DATA.fcCuvee||DATA.fcMacro;const sim1=Object.values(src).reduce((s,v)=>s+v.sim1,0);
+    const fyTot=Object.values(src).reduce((s,v)=>s+(v.fy||0),0);const d=fyTot>0?(sim1-fyTot)/fyTot:0;
+    K.push(kpi('Projection annuelle (SIM 1)',eur(sim1),fyTot>0?pct(d)+' vs 2025':'estimation',fyTot>0?sign(d):''));}
+  if(DATA.carnet)K.push(kpi('Carnet de commandes',eur(DATA.carnet.total),'engagé à venir','pos'));
+  if(DATA.resa)K.push(kpi('Réservations',eur(DATA.resa.total),'pipeline réservé','pos'));
+  if(DATA.encours){const a=DATA.encours.agg||[];const tot=a[6]||0;const retard=(a[0]||0)+(a[1]||0)+(a[2]||0);
+    K.push(kpi('Encours clients',eur(tot),(retard>0?'dont '+eur(retard)+' > 60 j':'à jour'),retard>0?'neg':'pos'));}
+  if(DATA.huile){const d=DATA.huile.ca26-DATA.huile.ca25;K.push(kpi("Huile d'olive",eur(DATA.huile.ca26),pct(DATA.huile.ca25>0?d/DATA.huile.ca25:0)+' vs N-1',sign(d)));}
+  if(DATA.stock){const tot=Object.values(DATA.stock).reduce((s,v)=>s+v.dispo,0);K.push(kpi('Stock 75 cl',int0(tot)+' btes','disponible',''));}
+  if(DATA.clients){const AC=DATA.clients.filter(c=>c.ca26>0);
+    const nP=AC.filter(c=>c.macro==='PRO').length,nD=AC.filter(c=>c.macro==='VENTE DIRECTE').length,nE=AC.filter(c=>c.macro==='EXPORT').length;
+    K.push(kpi('Clients actifs',int0(AC.length),`PRO ${nP} · Conso ${nD} · Export ${nE}`,''));}
+  $('kpis').innerHTML=K.join('');
+  $('synth-note').textContent=DATA.periods?`cumuls au ${DATA.periods.prevEnd} et au ${DATA.periods.curEnd}`:'';
+}
+const kpi=(l,v,s,c)=>`<div class="kpi"><div class="l">${l}</div><div class="v num ${c}">${v}</div><div class="s ${c}">${s}</div></div>`;
+
+/* ----- Clients ----- */
+let curFilter='Tous',curSearch='',curSort={k:'ca26',dir:-1};
+const CATS=[['Tous',null],['Non renouvelés','Non renouvelé'],['Nouveaux','Nouveau'],['En croissance','En croissance >20%'],['En baisse','En baisse >20%'],['Stables','Stable (±20%)']];
+const chipClass={'Non renouvelé':'perdu','Nouveau':'nouv','En croissance >20%':'cro','En baisse >20%':'bai','Stable (±20%)':'sta'};
+const chipLab={'Non renouvelé':'Perdu','Nouveau':'Nouveau','En croissance >20%':'Croissance','En baisse >20%':'Baisse','Stable (±20%)':'Stable'};
+function renderClients(){
+  const cl=DATA.clients;const present=new Set(cl.map(c=>c.canal));
+  const line=(lab,s,cls)=>{const cell=(v,f)=>`<td class="num">${f(v)}</td>`;
+    return `<tr class="${cls||''}"><td class="l">${lab}</td>${cell(s.perduN,int0)}${cell(s.perduCA,eur0)}${cell(s.nouvN,int0)}${cell(s.nouvCA,eur0)}${cell(s.croN,int0)}${cell(s.croCA,eur0)}${cell(s.baiN,int0)}${cell(s.baiCA,eur0)}${cell(s.staN,int0)}${cell(s.staCA,eur0)}${cell(s.actifs,int0)}${cell(s.ca26,eur0)}${cell(s.ca25,eur0)}<td class="num ${sign(s.delta)}">${(s.delta>=0?'+':'')+eur0(Math.abs(s.delta)).replace('—','0 €')}</td></tr>`;};
+  let h=`<div class="tw"><table><thead><tr><th class="l">Canal / Groupe</th><th colspan="2">Perdus</th><th colspan="2">Nouveaux</th><th colspan="2">Croissance</th><th colspan="2">Baisse</th><th colspan="2">Stables</th><th>Actifs</th><th>CA N</th><th>CA N-1</th><th>Δ</th></tr><tr><th class="l"></th>${'<th>Nb</th><th>CA</th>'.repeat(5)}<th></th><th></th><th></th><th></th></tr></thead><tbody>`;
+  const macroTot={};
+  const ordIdx=c=>{const i=PRO_ORDER.indexOf(c);return i<0?99:i;};
+  const proCanaux=[...new Set(cl.filter(c=>c.macro==='PRO').map(c=>c.canal))];
+  const inSG1=c=>['Alpilles direct','Les Agapes (Alpilles)','Les Agapes (Alpilles) **'].includes(c);
+  const inSG2=c=>c.startsWith('Clients en Direct');
+  const proGroups=[
+    ['Alpilles direct + Agapes',proCanaux.filter(inSG1).sort((a,b)=>ordIdx(a)-ordIdx(b))],
+    ['Clients en Direct',proCanaux.filter(inSG2).sort((a,b)=>ordIdx(a)-ordIdx(b))],
+    ['Autres PRO',proCanaux.filter(c=>!inSG1(c)&&!inSG2(c)).sort((a,b)=>ordIdx(a)-ordIdx(b))]
+  ];
+  h+=`<tr class="macro"><td colspan="15">PRO</td></tr>`;let proTot=zeroS();
+  for(const [gn,gc] of proGroups){if(!gc.length)continue;let gsub=zeroS();
+    for(const canal of gc){const s=chanStats(cl,canal);gsub=addS(gsub,s);h+=line(canal,s);}
+    proTot=addS(proTot,gsub);h+=line('Sous-total '+gn,gsub,'sub');}
+  macroTot['PRO']=proTot;h+=line('TOTAL PRO',proTot,'sub');
+  for(const [mn,order] of [['VENTE DIRECTE',CONS_ORDER],['EXPORT',EXP_ORDER]]){
+    h+=`<tr class="macro"><td colspan="15">${mn}</td></tr>`;let sub=zeroS();
+    for(const canal of order){if(!present.has(canal))continue;const s=chanStats(cl,canal);sub=addS(sub,s);h+=line(canal,s);}
+    macroTot[mn]=sub;h+=line('Total '+mn,sub,'sub');}
+  const grand=Object.values(macroTot).reduce((a,b)=>addS(a,b),zeroS());
+  h+=line('TOTAL GÉNÉRAL',grand,'tot')+'</tbody></table></div>';
+  h+=`<div class="filters" id="cf" style="margin-top:18px"></div><div class="tw" id="cl" style="max-height:520px;overflow-y:auto"></div>`;
+  setTimeout(()=>{renderCFilters();renderCList();},0);
+  return h;
+}
+function renderCFilters(){const cl=DATA.clients;const cnt=c=>c?cl.filter(x=>x.cat===c).length:cl.length;
+  $('cf').innerHTML=CATS.map(([lab,c])=>`<span class="fchip ${lab===curFilter?'on':''}" data-f="${lab}" data-c="${c||''}">${lab} <span class="num">${cnt(c)}</span></span>`).join('')+`<input class="search" id="cs" placeholder="Rechercher…" value="${curSearch}">`;
+  document.querySelectorAll('#cf .fchip').forEach(el=>el.onclick=()=>{curFilter=el.dataset.f;renderCFilters();renderCList();});
+  $('cs').oninput=()=>{curSearch=$('cs').value;renderCList();};}
+function renderCList(){const cl=DATA.clients;const fcat=CATS.find(([l])=>l===curFilter)[1];
+  let list=cl.filter(c=>(!fcat||c.cat===fcat)&&(!curSearch||c.client.toLowerCase().includes(curSearch.toLowerCase())||c.canal.toLowerCase().includes(curSearch.toLowerCase())));
+  const {k,dir}=curSort;list=list.slice().sort((a,b)=>{let x=a[k],y=b[k];if(k==='delta'){x=a.ca26-a.ca25;y=b.ca26-b.ca25;}if(typeof x==='string'){x=x.toLowerCase();y=y.toLowerCase();return x<y?-dir:x>y?dir:0;}return(x-y)*dir;});
+  const ar=key=>curSort.k===key?(curSort.dir<0?' ↓':' ↑'):'';
+  const H=(key,lab,c)=>`<th class="${c||''}" data-k="${key}" style="cursor:pointer">${lab}${ar(key)}</th>`;
+  let h=`<table><thead><tr>${H('client','Client','l')}${H('canal','Canal','l')}${H('ca25','CA N-1')}${H('ca26','CA N')}${H('delta','Δ €')}<th>Δ %</th>${H('cat','Catégorie','l')}</tr></thead><tbody>`;
+  for(const c of list){const d=c.ca26-c.ca25,dp=c.ca25>0?d/c.ca25:null;
+    h+=`<tr><td class="l" title="${c.note||''}">${c.client}</td><td class="l">${c.canal}</td><td class="num">${eur0(c.ca25)}</td><td class="num">${eur0(c.ca26)}</td><td class="num ${sign(d)}">${(d>=0?'+':'')+Math.round(d).toLocaleString('fr-FR')}</td><td class="num ${dp===null?'':sign(dp)}">${dp===null?'n/d':pct(dp)}</td><td class="l"><span class="chip ${chipClass[c.cat]}">${chipLab[c.cat]}</span></td></tr>`;}
+  h+='</tbody></table>';$('cl').innerHTML=h;
+  $('cl').querySelectorAll('th[data-k]').forEach(th=>th.onclick=()=>{const key=th.dataset.k;curSort=curSort.k===key?{k:key,dir:-curSort.dir}:{k:key,dir:(key==='client'||key==='canal'||key==='cat')?1:-1};renderCList();});}
+
+/* ----- Cuvées ----- */
+function renderCuvees(){
+  const c=DATA.cuvees;const ents=Object.entries(c).sort((a,b)=>b[1].ca26-a[1].ca26);
+  const totN=ents.reduce((s,[,v])=>s+v.ca26,0);
+  const byColor={Blanc:0,Rouge:0,'Rosé':0};ents.forEach(([,v])=>byColor[v.color]+=v.ca26);
+  let h=`<div class="grid2"><div><div class="tw"><table><thead><tr><th class="l">Cuvée</th><th>CA N-1</th><th>CA N</th><th>Δ</th><th>Btes N</th><th>Part</th></tr></thead><tbody>`;
+  for(const [cu,v] of ents){const d=v.ca26-v.ca25;h+=`<tr><td class="l">${cu.charAt(0)+cu.slice(1).toLowerCase()}</td><td class="num">${eur0(v.ca25)}</td><td class="num">${eur0(v.ca26)}</td><td class="num ${sign(d)}">${(d>=0?'+':'')+Math.round(d).toLocaleString('fr-FR')}</td><td class="num">${int0(v.btes26)}</td><td class="num">${totN>0?Math.round(v.ca26/totN*100):0} %</td></tr>`;}
+  h+=`</tbody></table></div></div><div><div style="font-size:12px;color:var(--muted);margin-bottom:8px">Répartition du CA N par couleur</div>`;
+  const cmax=Math.max(...ents.map(([,v])=>v.ca26));
+  for(const [cu,v] of ents){h+=`<div class="bar-row"><div class="cn">${cu.charAt(0)+cu.slice(1).toLowerCase()}<small>${v.color}</small></div><div class="track"><div class="fill ${v.color}" style="width:${Math.max(2,v.ca26/cmax*100)}%"></div></div><div class="qt">${eur0(v.ca26)}</div></div>`;}
+  h+=`<div class="legend">`+Object.entries(byColor).map(([k,val])=>`<span><i class="fill ${k}" style="display:inline-block;width:11px;height:11px"></i>${k} ${totN>0?Math.round(val/totN*100):0} %</span>`).join('')+`</div></div></div>`;
+  return h;
+}
+/* ----- Produits phares (ventes détaillées) ----- */
+const PHARES=['VESPRO','INITIUM','ULTIMA LAUDE','Z-MERLOT'];
+function renderParticuliers(){
+  const P=DATA.particuliers;if(!P||!P.years.length)return '';
+  const nom=P.rows.filter(o=>!o.isAgg);const agg=P.rows.filter(o=>o.isAgg);
+  const cur=new Date().getFullYear();const partialY=P.years.includes(String(cur))?String(cur):null;
+  const fullY=P.years.filter(y=>y!==partialY);const yb=fullY[fullY.length-1],ya=fullY[fullY.length-2];
+  const caNom=y=>nom.reduce((s,o)=>s+(o.by[y]?o.by[y].mt:0),0);
+  const actN=y=>nom.reduce((s,o)=>s+(o.by[y]&&(o.by[y].mt>0||o.by[y].eq>0)?1:0),0);
+  const caAgg=y=>agg.reduce((s,o)=>s+(o.by[y]?o.by[y].mt:0),0);
+  // KPI
+  const dP=ya&&caNom(ya)>0?caNom(yb)/caNom(ya)-1:null;
+  const paysSet=new Set(nom.map(o=>o.pays).filter(Boolean));
+  const kp=(l,v,sub,c)=>`<div class="kpi"><div class="l">${l}</div><div class="v num ${c||''}">${v}</div>${sub?`<div class="s ${c||''}">${sub}</div>`:''}</div>`;
+  let h=`<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px">
+    ${kp('CA particuliers '+yb,eur0(caNom(yb)),dP!=null?pct(dP)+' vs '+ya:'',dP!=null?sign(dP):'')}
+    ${kp('Clients actifs '+yb,int0(actN(yb)),'fiches nominatives','')}
+    ${kp('Clients cumulés',int0(nom.length),'2018→'+(partialY||yb),'')}
+    ${kp('Pays représentés',int0(paysSet.size),'export & vente directe','')}
+  </div>`;
+  // Historique CA + Pays côte à côte
+  const maxCA=Math.max(...P.years.map(caNom),1);
+  let hist='';for(const y of P.years){const v=caNom(y);const part=y===partialY;
+    hist+=`<div class="bar-row"><div class="cn">${y}${part?'<small>en cours</small>':'<small>'+int0(actN(y))+' clients</small>'}</div><div class="track"><div class="fill" style="width:${Math.max(2,v/maxCA*100)}%;background:${part?'var(--yellow)':'var(--gold)'}"></div></div><div class="qt">${eur0(v)}</div></div>`;}
+  // Pays (année yb)
+  const byPays={};nom.forEach(o=>{if(o.by[yb])byPays[o.pays||'—']=(byPays[o.pays||'—']||0)+o.by[yb].mt;});
+  const paysArr=Object.entries(byPays).sort((a,b)=>b[1]-a[1]);const topP=paysArr.slice(0,8);const autres=paysArr.slice(8).reduce((s,x)=>s+x[1],0);if(autres>0)topP.push(['Autres',autres]);
+  const maxP=Math.max(...topP.map(x=>x[1]),1);
+  let pays='';for(const [k,v] of topP){pays+=`<div class="bar-row"><div class="cn">${k}</div><div class="track"><div class="fill" style="width:${Math.max(2,v/maxP*100)}%;background:var(--olive)"></div></div><div class="qt">${eur0(v)}</div></div>`;}
+  h+=`<div class="grid2">
+    <div><div style="font-size:12px;color:var(--muted);margin-bottom:8px">Chiffre d'affaires particuliers par année (fiches nominatives)</div>${hist}</div>
+    <div><div style="font-size:12px;color:var(--muted);margin-bottom:8px">Répartition par pays · CA ${yb}</div>${pays}</div>
+  </div>`;
+  // Cohortes yb vs ya
+  if(ya){const inY=y=>new Set(nom.filter(o=>o.by[y]&&(o.by[y].mt>0||o.by[y].eq>0)).map(o=>o.name));
+    const A=inY(ya),B=inY(yb);
+    let nouv=0,nouvCA=0,perd=0,perdCA=0,rec=0,recCA=0;
+    nom.forEach(o=>{const a=A.has(o.name),b=B.has(o.name);if(b&&!a){nouv++;nouvCA+=o.by[yb].mt;}else if(a&&!b){perd++;perdCA+=o.by[ya].mt;}else if(a&&b){rec++;recCA+=o.by[yb].mt;}});
+    h+=`<div class="detrows" style="margin-top:18px">
+      <div><span>Nouveaux ${yb}</span><b class="pos">${int0(nouv)} · ${eur0(nouvCA)}</b></div>
+      <div><span>Perdus (actifs ${ya}, absents ${yb})</span><b class="neg">${int0(perd)} · ${eur0(perdCA)}</b></div>
+      <div><span>Récurrents ${ya}→${yb}</span><b>${int0(rec)} · ${eur0(recCA)}</b></div>
+    </div>`;}
+  // Top particuliers
+  const top=nom.filter(o=>o.by[yb]).sort((a,b)=>b.by[yb].mt-a.by[yb].mt).slice(0,15);
+  let rowsH='';for(const o of top){const vb=o.by[yb].mt,va=o.by[ya]?o.by[ya].mt:0,d=vb-va;
+    rowsH+=`<tr><td class="l" title="${o.cp||''}">${o.name}</td><td class="l">${o.pays||'—'}</td><td class="num">${eur0(va)}</td><td class="num">${eur0(vb)}</td><td class="num ${sign(d)}">${(d>=0?'+':'')+eur0(Math.abs(d)).replace('—','0 €')}</td></tr>`;}
+  h+=`<div style="font-size:12px;color:var(--muted);margin:18px 0 8px">Top 15 particuliers · CA ${yb}</div>
+    <div class="tw"><table><thead><tr><th class="l">Client</th><th class="l">Pays</th><th>CA ${ya||'N-1'}</th><th>CA ${yb} ↓</th><th>Δ</th></tr></thead><tbody>${rowsH}</tbody></table></div>`;
+  if(agg.length){const c=caAgg(yb);h+=`<div class="legend" style="margin-top:12px"><span>Fiche « Particulier » (clients anonymes / de passage / sans coordonnées) exclue des classements nominatifs ci-dessus : ${eur0(c)} en ${yb}.</span></div>`;}
+  return h;
+}
+const DEPT_NAMES={'01':'Ain','02':'Aisne','03':'Allier','04':'Alpes-de-Haute-Provence','05':'Hautes-Alpes','06':'Alpes-Maritimes','07':'Ardèche','08':'Ardennes','09':'Ariège','10':'Aube','11':'Aude','12':'Aveyron','13':'Bouches-du-Rhône','14':'Calvados','15':'Cantal','16':'Charente','17':'Charente-Maritime','18':'Cher','19':'Corrèze','20':'Corse','21':'Côte-d\u2019Or','22':'Côtes-d\u2019Armor','23':'Creuse','24':'Dordogne','25':'Doubs','26':'Drôme','27':'Eure','28':'Eure-et-Loir','29':'Finistère','30':'Gard','31':'Haute-Garonne','32':'Gers','33':'Gironde','34':'Hérault','35':'Ille-et-Vilaine','36':'Indre','37':'Indre-et-Loire','38':'Isère','39':'Jura','40':'Landes','41':'Loir-et-Cher','42':'Loire','43':'Haute-Loire','44':'Loire-Atlantique','45':'Loiret','46':'Lot','47':'Lot-et-Garonne','48':'Lozère','49':'Maine-et-Loire','50':'Manche','51':'Marne','52':'Haute-Marne','53':'Mayenne','54':'Meurthe-et-Moselle','55':'Meuse','56':'Morbihan','57':'Moselle','58':'Nièvre','59':'Nord','60':'Oise','61':'Orne','62':'Pas-de-Calais','63':'Puy-de-Dôme','64':'Pyrénées-Atlantiques','65':'Hautes-Pyrénées','66':'Pyrénées-Orientales','67':'Bas-Rhin','68':'Haut-Rhin','69':'Rhône','70':'Haute-Saône','71':'Saône-et-Loire','72':'Sarthe','73':'Savoie','74':'Haute-Savoie','75':'Paris','76':'Seine-Maritime','77':'Seine-et-Marne','78':'Yvelines','79':'Deux-Sèvres','80':'Somme','81':'Tarn','82':'Tarn-et-Garonne','83':'Var','84':'Vaucluse','85':'Vendée','86':'Vienne','87':'Haute-Vienne','88':'Vosges','89':'Yonne','90':'Territoire de Belfort','91':'Essonne','92':'Hauts-de-Seine','93':'Seine-Saint-Denis','94':'Val-de-Marne','95':'Val-d\u2019Oise','971':'Guadeloupe','972':'Martinique','973':'Guyane','974':'La Réunion','976':'Mayotte'};
+function fidZone(pays,cp){
+  const p=(pays||'').trim();cp=String(cp||'').trim();
+  if(p&&!/^france$/i.test(p))return 'Étranger';
+  if(!cp)return 'Sans code postal';
+  const d=cp.slice(0,2);
+  if(['13','84','30'].includes(d))return 'Proximité (13/84/30)';
+  if(['75','77','78','91','92','93','94','95'].includes(d))return 'Île-de-France';
+  return 'Autres France';
+}
+const FID_SEGS=['Champions','Fidèles','Occasionnels','Nouveaux','À réactiver'];
+const FID_SEGDESC={Champions:'3 ans et + · actifs',Fidèles:'2 ans · actifs',Occasionnels:'1 an · actifs (ancien)',Nouveaux:'1er achat récent',['À réactiver']:'historique · silencieux récemment'};
+function fidCompute(){
+  const F=DATA.fidelite;if(!F||!F.clients)return null;
+  const years=[...F.years].sort();if(!years.length)return null;
+  const cur=String(new Date().getFullYear());
+  const partialY=years.includes(cur)?cur:null;
+  const fullY=years.filter(y=>y!==partialY);
+  const lastFull=fullY[fullY.length-1]||years[years.length-1];
+  const geo={};if(DATA.particuliers){DATA.particuliers.rows.forEach(o=>{geo[o.name.trim().replace(/\s+/g,' ').toLowerCase()]={pays:o.pays,cp:o.cp,ville:o.ville};});}
+  const list=[];
+  for(const k in F.clients){const o=F.clients[k];
+    const ca=y=>o.by[y]?o.by[y].ca:0;
+    const caPer=years.reduce((s,y)=>s+ca(y),0);
+    if(caPer<=0)continue;
+    const freq=fullY.filter(y=>ca(y)>0).length;
+    const firstY=years.find(y=>ca(y)>0);
+    const activeRecent=ca(lastFull)>0||(partialY&&ca(partialY)>0);
+    const macro=fidMacro(o)==='VD'?'Vente directe':'PRO';
+    let seg;
+    if(!activeRecent) seg='À réactiver';
+    else if(freq>=3) seg='Champions';
+    else if(freq===2) seg='Fidèles';
+    else if(firstY>=lastFull) seg='Nouveaux';
+    else seg='Occasionnels';
+    const g=geo[k]||{};
+    list.push({name:o.name,macro,seg,freq,caPer,caLast:ca(years[years.length-1]),caN1:(years.length>1?ca(years[years.length-2]):0),caN2:(years.length>2?ca(years[years.length-3]):0),first:firstY,recent:activeRecent,pays:g.pays||'',cp:g.cp||'',ville:g.ville||''});
+  }
+  return {years,fullY,lastFull,partialY,N:years[years.length-1],N1:(years.length>1?years[years.length-2]:null),N2:(years.length>2?years[years.length-3]:null),list};
+}
+function fidGeo(){
+  if(!DATA.particuliers)return null;
+  const yrs=DATA.particuliers.years;
+  const caTot=o=>yrs.reduce((s,y)=>s+(o.by[y]?o.by[y].mt:0),0);
+  const isFR=p=>/^(france|fr)$/i.test((p||'').trim());
+  const pad5=cp=>{cp=String(cp==null?'':cp).replace(/\s/g,'').trim();if(/^\d+$/.test(cp)&&cp.length<5)cp=('00000'+cp).slice(-5);return cp;};
+  const rowsP=DATA.particuliers.rows.filter(o=>!o.isAgg);
+  const hasCP=rowsP.some(o=>/^\d{5}$/.test(pad5(o.cp)));
+  const leafOf=o=>{const cp=pad5(o.cp);const v=(o.ville||'').trim();return v?(hasCP&&/^\d{5}$/.test(cp)?v+' ('+cp+')':v):(/^\d{5}$/.test(cp)?cp:'Non renseignée');};
+  const C={};let noLoc={n:0,ca:0};
+  rowsP.forEach(o=>{const ca=caTot(o);const pays=(o.pays||'').trim();const cp=pad5(o.cp);const ville=(o.ville||'').trim();
+    if(!pays&&!ville&&!/^\d{5}$/.test(cp)){noLoc.n++;noLoc.ca+=ca;return;}
+    const fr=isFR(pays)||(!pays&&(ville||/^\d{5}$/.test(cp)));
+    const country=fr?'France':(pays||'Pays non renseigné');
+    const c=C[country]=C[country]||{n:0,ca:0,depts:{},leaves:{}};c.n++;c.ca+=ca;
+    const leaf=leafOf(o);
+    if(fr&&hasCP){const numeric=/^\d{5}$/.test(cp);const dep=!numeric?'__none':(/^9[78]/.test(cp)?cp.slice(0,3):cp.slice(0,2));
+      const dd=c.depts[dep]=c.depts[dep]||{n:0,ca:0,leaves:{}};dd.n++;dd.ca+=ca;
+      const cc=dd.leaves[leaf]=dd.leaves[leaf]||{n:0,ca:0};cc.n++;cc.ca+=ca;
+    } else {const cc=c.leaves[leaf]=c.leaves[leaf]||{n:0,ca:0};cc.n++;cc.ca+=ca;}
+  });
+  return {yrs,hasCP,C,noLoc};
+}
+function renderFidelite(){
+  const C0=fidCompute();if(!C0)return '';
+  const {years,fullY,lastFull,partialY,list}=C0;
+  const SEGS=FID_SEGS,SEGDESC=FID_SEGDESC;
+  const eur0s=v=>!v?'—':Math.round(v).toLocaleString('fr-FR')+' €';
+  // KPI — N vs N-1, filtrables Tous/Vente directe/PRO (remplis par initFidelite)
+  const N=C0.N,N1=C0.N1,N2=C0.N2;
+  const KBTN='padding:6px 12px;border:1px solid var(--line);border-radius:8px;background:transparent;cursor:pointer;font:inherit;font-size:13px;color:var(--ink)';
+  let h=`<div class="note" style="margin-bottom:12px">Comparaison <b>${N}</b> vs <b>${N1||'—'}</b> (année en cours vs précédente) · cuvées du domaine, réalisé net. ${N} est l'année en cours (cumul à ce jour), donc en deçà d'une année complète.</div>
+    <div id="fidseg" style="display:flex;gap:8px;margin:6px 0 16px">
+      <button data-k="Tous" style="${KBTN}">Tous</button><button data-k="Vente directe" style="${KBTN}">Vente directe</button><button data-k="PRO" style="${KBTN}">PRO</button>
+    </div>
+    <div id="fkpi"></div>`;
+  // Brique interactive 1 : cohortes + zoom année (remplie par initFidelite)
+  const BTN='flex:1;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:transparent;cursor:pointer;font:inherit;font-size:13px;color:var(--ink)';
+  h+=`<div style="font-size:13px;color:var(--muted);margin:6px 0 12px">Fidélité dans le temps — rétention par cohorte, puis zoom par année</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Rétention par cohorte — cliquez une année pour la détailler ↓</div>
+    <div id="fpgrid"></div>
+    <div style="height:1px;background:var(--line);margin:1.25rem 0"></div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap"><span style="font-size:13px;color:var(--muted)">Zoom sur l'année</span><div id="fpyear" style="display:flex;gap:6px"></div></div>
+    <div id="fpzoom"></div>
+    <div style="height:1px;background:var(--line);margin:1.5rem 0"></div>`;
+  // Brique interactive 2 : camembert provenance (agrandi)
+  if(DATA.particuliers){
+    h+=`<div style="font-size:13px;color:var(--muted);margin:6px 0 12px">Provenance des particuliers — cliquez une part pour zoomer pays → département → ville</div>
+      <div id="fgcrumb" style="font-size:12px;color:var(--muted);margin-bottom:4px"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px">
+        <div><div id="fgtitleA" style="font-size:13px;font-weight:600;margin-bottom:8px"></div><div style="position:relative;width:100%;height:260px"><canvas id="fgpieA"></canvas></div><div id="fglistA" style="font-size:12px;margin-top:10px"></div></div>
+        <div><div id="fgtitleB" style="font-size:13px;font-weight:600;margin-bottom:8px"></div><div style="position:relative;width:100%;height:260px"><canvas id="fgpieB"></canvas></div><div id="fglistB" style="font-size:12px;margin-top:10px"></div></div>
+      </div>
+      <div class="legend" style="margin-top:12px"><span>Nombre de clients particuliers. « Non renseignée » / « Sans code postal » = info absente de la fiche.</span></div>`;
+  }
+  // Brique interactive 3 : clients à réactiver (N, N-1, N-2) — tout en bas
+  const RBTN='padding:6px 12px;border:1px solid var(--line);border-radius:8px;background:transparent;cursor:pointer;font:inherit;font-size:13px;color:var(--ink)';
+  h+=`<div style="height:1px;background:var(--line);margin:1.75rem 0"></div>
+    <div style="font-size:13px;color:var(--muted);margin:6px 0 4px">Clients à réactiver — silencieux en ${N}, mais actifs en ${N1||'N-1'} ou ${N2||'N-2'}</div>
+    <div id="freact"></div>`;
+  return h;
+}
+function histData(){
+  const F=DATA.fidelite;if(!F||!F.clients)return null;
+  const years=[...F.years].sort();if(!years.length)return null;
+  const by={};years.forEach(y=>by[y]={pro:0,part:0});
+  for(const k in F.clients){const o=F.clients[k];const isPart=fidMacro(o)==='VD';
+    for(const y in o.by){if(!by[y])by[y]={pro:0,part:0};if(isPart)by[y].part+=o.by[y].ca;else by[y].pro+=o.by[y].ca;}}
+  return {years,by};
+}
+function renderHistorique(){
+  const H=histData();if(!H)return '';
+  const {years,by}=H;const cur=String(new Date().getFullYear());
+  const tot=y=>by[y].pro+by[y].part;
+  const mx=Math.max(...years.map(tot),1);
+  const eur0s=v=>!v?'—':Math.round(v).toLocaleString('fr-FR')+' €';
+  const full=years.filter(y=>y!==cur);const yb=full[full.length-1],ya=full[full.length-2];
+  const dpct=ya&&tot(ya)?(tot(yb)/tot(ya)-1):null;
+  let h=`<div class="note" style="margin-bottom:14px">CA vin du domaine (réalisé net), par année. ${years.includes(cur)?`L'année ${cur} est en cours (YTD).`:''} Barres empilées par macro-canal : <b style="color:var(--gold)">■ PRO</b> · <b style="color:var(--rust)">■ Vente directe</b>.${dpct!=null?` Évolution ${ya}→${yb} : <b class="${sign(dpct)}">${pct(dpct)}</b>.`:''}</div>`;
+  h+=years.map(y=>{const t=tot(y);const wPro=t?by[y].pro/mx*100:0;const wPart=t?by[y].part/mx*100:0;const partial=y===cur;
+    return `<div class="bar-row"><div class="cn">${y}${partial?'<small>YTD</small>':''}</div><div class="track" style="display:flex;gap:0">${wPro?`<div class="fill" style="width:${wPro}%;background:var(--gold)" title="PRO · ${eur0s(by[y].pro)}"></div>`:''}${wPart?`<div class="fill" style="width:${wPart}%;background:var(--rust)" title="Vente directe · ${eur0s(by[y].part)}"></div>`:''}</div><div class="qt">${eur0s(t)}</div></div>`;}).join('');
+  h+=`<div class="legend" style="margin-top:10px"><span>Périmètre cuvées du domaine (rouge/blanc/rosé), factures − avoirs. Séparation PRO / Vente directe déduite du représentant (Caveau, Caveau Pro., Site/Mail, sans représentant = vente directe).</span></div>`;
+  return h;
+}
+function fidBuildCohort(){
+  const F=DATA.fidelite;const years=[...F.years].sort();
+  const macros={Tous:()=>true,'Vente directe':o=>fidMacro(o)==='VD',PRO:o=>fidMacro(o)==='PRO'};
+  const out={years,CD:{},Z:{}};
+  for(const m in macros){const test=macros[m];
+    const size={},act={},Z={};years.forEach(c=>{size[c]=0;act[c]=years.map(()=>0);Z[c]=[0,0,0,0];});
+    for(const k in F.clients){const o=F.clients[k];if(!test(o))continue;
+      const ay=years.filter(y=>o.by[y]&&o.by[y].ca>0);if(!ay.length)continue;
+      const first=ay[0];size[first]++;
+      years.forEach((y,iy)=>{if(o.by[y]&&o.by[y].ca>0)act[first][iy]++;});
+      years.forEach((Y,iy)=>{if(!(o.by[Y]&&o.by[Y].ca>0))return;const ten=years.slice(0,iy+1).filter(y=>o.by[y]&&o.by[y].ca>0).length;Z[Y][Math.min(ten,4)-1]++;});
+    }
+    const CDm={size:{},act:{}};years.forEach((c,ic)=>{CDm.size[c]=size[c];CDm.act[c]=years.map((y,iy)=>iy<ic?null:act[c][iy]);});
+    out.CD[m]=CDm;out.Z[m]=Z;
+  }
+  return out;
+}
+function fidProvenance(){
+  const pad5=cp=>{cp=String(cp==null?'':cp).replace(/\s/g,'').trim();if(/^\d+$/.test(cp)&&cp.length<5)cp=('00000'+cp).slice(-5);return cp;};
+  const isFR=p=>/^(france|fr)$/i.test((p||'').trim());
+  const pays={},fr={},foreign={};
+  DATA.particuliers.rows.filter(o=>!o.isAgg).forEach(o=>{
+    const p=(o.pays||'').trim();const cp=pad5(o.cp);const v=(o.ville||'').trim()||'Non renseignée';
+    const frq=isFR(p)||(!p&&((o.ville||'').trim()||/^\d{5}$/.test(cp)));
+    const country=frq?'France':(p||'Pays non renseigné');
+    pays[country]=(pays[country]||0)+1;
+    if(frq){const dep=/^\d{5}$/.test(cp)?(/^9[78]/.test(cp)?cp.slice(0,3):cp.slice(0,2)):'__none';
+      const d=fr[dep]=fr[dep]||{n:0,v:{}};d.n++;d.v[v]=(d.v[v]||0)+1;
+    } else {const f=foreign[country]=foreign[country]||{n:0,v:{}};f.n++;f.v[v]=(f.v[v]||0)+1;}
+  });
+  return {pays,fr,foreign};
+}
+let fidChart=null;
+function initFidelite(){
+  if(!DATA.fidelite||!document.getElementById('fpgrid'))return;
+  const CF=fidCompute();if(!CF)return;
+  const {N,N1,N2,list}=CF;
+  const B=fidBuildCohort();const YEARS=B.years;
+  const cur=String(new Date().getFullYear());const fullY=YEARS.filter(y=>y!==cur);
+  const e0=v=>!v?'—':Math.round(v).toLocaleString('fr-FR')+' €';
+  let SEL='Tous';let zy=fullY[fullY.length-1]||YEARS[YEARS.length-1];
+  const kp=(l,v,sub,c)=>`<div class="kpi"><div class="l">${l}</div><div class="v num ${c||''}">${v}</div>${sub?`<div class="s ${c||''}">${sub}</div>`:''}</div>`;
+  function kpiRender(){
+    const L=list.filter(c=>SEL==='Tous'||c.macro===SEL);
+    const actN=L.filter(c=>c.caLast>0),actN1=L.filter(c=>c.caN1>0);
+    const nouveaux=actN.filter(c=>c.first===N).length;
+    const perdus=L.filter(c=>c.caN1>0&&!(c.caLast>0));const caReconq=perdus.reduce((s,c)=>s+c.caN1,0);
+    const evo=(N1&&actN1.length)?actN.length/actN1.length-1:null;
+    const el=document.getElementById('fkpi');if(el)el.innerHTML=`<div style="display:flex;gap:12px;flex-wrap:wrap">${kp('Clients actifs '+N,actN.length.toLocaleString('fr-FR'),evo!=null?((evo>=0?'+':'')+Math.round(evo*100)+'% vs '+N1):(N1?'vs '+N1:''),evo!=null?(evo>=0?'pos':'neg'):'')}${kp('Nouveaux '+N,nouveaux.toLocaleString('fr-FR'),'1ᵉʳ achat en '+N,'')}${kp('Perdus vs '+N1,perdus.length.toLocaleString('fr-FR'),'actifs '+N1+', absents '+N,'neg')}${kp('CA à reconquérir',e0(caReconq),'CA '+N1+' des perdus','')}</div>`;
+  }
+  const LV=[{l:'Nouveaux — 1 an d’achat',c:'#6E7355'},{l:'Fidèles — 2 ans',c:'#B0851F'},{l:'Fidèles — 3 ans',c:'#A8842B'},{l:'Fidèles — 4 ans',c:'#A8481E'}];
+  function grid(){const d=B.CD[SEL];let g='<div style="display:grid;grid-template-columns:120px repeat('+YEARS.length+',1fr);gap:4px;align-items:center">';
+    g+='<div></div>'+YEARS.map(y=>`<div data-y="${y}" class="fpy" style="cursor:pointer;font-size:11px;text-align:center;padding:3px;border-radius:5px;font-weight:${y===zy?'600':'400'};color:${y===zy?'var(--ink)':'var(--muted)'};background:${y===zy?'var(--line-soft)':'transparent'}">${y}</div>`).join('');
+    YEARS.forEach((c,ic)=>{g+=`<div style="font-size:12px;color:var(--muted);text-align:right;padding-right:8px">Acquis ${c}<div style="font-size:11px">${d.size[c].toLocaleString('fr-FR')} clients</div></div>`;
+      d.act[c].forEach((n,i)=>{const selY=YEARS[i]===zy;
+        if(n===null){g+=`<div style="aspect-ratio:2.4;border-radius:6px;background:transparent;${selY?'outline:2px solid var(--line)':''}"></div>`;return;}
+        const pct=d.size[c]?Math.round(n/d.size[c]*100):0;const o=0.10+0.90*(pct/100);const tc=o>0.5?'#fff':'#123';
+        g+=`<div class="fpcell" data-y="${YEARS[i]}" title="Cohorte ${c} · actifs en ${YEARS[i]} : ${n} (${pct}%)" style="cursor:pointer;aspect-ratio:2.4;border-radius:6px;background:rgba(15,110,86,${o.toFixed(2)});display:flex;flex-direction:column;align-items:center;justify-content:center;color:${tc};${selY?'outline:2px solid var(--ink);outline-offset:-1px':''}"><span style="font-size:15px;font-weight:600">${pct}%</span><span style="font-size:10px;opacity:.85">${n}</span></div>`;});
+    });g+='</div>';document.getElementById('fpgrid').innerHTML=g;
+    document.querySelectorAll('#fpgrid .fpy,#fpgrid .fpcell').forEach(el=>el.onclick=()=>{zy=el.dataset.y;cohRender();});
+  }
+  function yearsBtn(){const BB='padding:4px 12px;border:1px solid var(--line);border-radius:8px;cursor:pointer;font:inherit;font-size:12px';
+    document.getElementById('fpyear').innerHTML=YEARS.map(y=>`<button data-y="${y}" style="${BB};${y===zy?'background:var(--bordeaux);color:#fff;border-color:var(--bordeaux)':'background:transparent;color:var(--ink)'}">${y}</button>`).join('');
+    document.querySelectorAll('#fpyear button').forEach(b=>b.onclick=()=>{zy=b.dataset.y;cohRender();});}
+  function zoom(){const arr=B.Z[SEL][zy]||[0,0,0,0];const tot=arr.reduce((a,b)=>a+b,0)||1;const mx=Math.max(...arr,1);
+    let x=`<div style="font-size:12px;color:var(--muted);margin-bottom:10px">${tot.toLocaleString('fr-FR')} clients actifs en ${zy} · par ancienneté</div>`;
+    LV.forEach((lv,i)=>{const n=arr[i];const pct=Math.round(n/tot*100);
+      x+=`<div style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:3px"><span style="font-weight:600">${lv.l}</span><span style="color:var(--muted)">${n.toLocaleString('fr-FR')} · ${pct}%</span></div><div style="height:16px;border-radius:6px;background:var(--line-soft);overflow:hidden"><div style="height:100%;width:${n?Math.max(2,n/mx*100):0}%;background:${lv.c};border-radius:6px"></div></div></div>`;});
+    document.getElementById('fpzoom').innerHTML=x;}
+  function cohRender(){grid();yearsBtn();zoom();}
+  function reactRender(){
+    const el=document.getElementById('freact');if(!el)return;
+    const cand=list.filter(c=>c.caLast===0&&(c.caN1>0||c.caN2>0)&&(SEL==='Tous'||c.macro===SEL)).sort((a,b)=>(b.caN1-a.caN1)||(b.caN2-a.caN2));
+    const rows=cand.slice(0,60).map(c=>{const last=c.caN1>0?N1:N2;return `<tr><td class="l">${c.name}</td><td class="l">${c.macro}</td><td class="l">${c.pays||'—'}</td><td class="num">${e0(c.caN2)}</td><td class="num">${e0(c.caN1)}</td><td class="l">${last}</td></tr>`;}).join('');
+    el.innerHTML=`<div style="font-size:12px;color:var(--muted);margin-bottom:8px">${cand.length} clients à réactiver${cand.length>60?' · top 60 affichés':''} · triés par CA ${N1}</div><div class="tw"><table><thead><tr><th class="l">Client</th><th class="l">Canal</th><th class="l">Pays</th><th>CA ${N2||'N-2'}</th><th>CA ${N1||'N-1'}</th><th class="l">Dernier achat</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  }
+  function applyAll(){kpiRender();cohRender();reactRender();document.querySelectorAll('#fidseg button').forEach(b=>{const on=b.dataset.k===SEL;b.style.background=on?'var(--bordeaux)':'transparent';b.style.color=on?'#fff':'var(--ink)';b.style.borderColor=on?'var(--bordeaux)':'var(--line)';});}
+  document.querySelectorAll('#fidseg button').forEach(b=>b.onclick=()=>{SEL=b.dataset.k;applyAll();});
+  applyAll();
+
+  // === Brique 2 : camembert maître-détail (2 donuts) ===
+  if(DATA.particuliers&&document.getElementById('fgpieA')&&window.Chart){
+    const GEO=fidProvenance();
+    const PAL=['#A8842B','#6E7355','#A8481E','#E0AE3A','#262019','#B0851F','#C2703B','#8A8578','#4E6B3E','#9E3B1C'];const GRAY='#B4B2A9';
+    const grayLbl=l=>/Autres|Non renseign|Sans code/i.test(l);
+    const deptLabel=d=>(d==='__none'?'Sans code postal':(DEPT_NAMES[d]?d+' — '+DEPT_NAMES[d]:'Dépt '+d));
+    const topN=(entries,n,other)=>{entries=entries.slice().sort((a,b)=>b[1]-a[1]);const top=entries.slice(0,n),rest=entries.slice(n);const o=rest.reduce((s,e)=>s+e[1],0);const arr=top.map(([k,v])=>({key:k,label:k,n:v}));if(o)arr.push({key:'__autres',label:other,n:o});return arr;};
+    const deptSlices=(n)=>{const arr=topN(Object.entries(GEO.fr).map(([d,o])=>[d,o.n]),n,'Autres départements');arr.forEach(x=>{x.label=x.key==='__autres'?'Autres départements':deptLabel(x.key);x.drill=x.key!=='__autres'&&!!GEO.fr[x.key];});return arr;};
+    const citySlices=(v)=>{const arr=topN(Object.entries(v),12,'Autres communes');arr.forEach(x=>x.drill=false);return arr;};
+    let kind='pays',sel='France';
+    function leftData(){
+      if(kind==='pays'){const arr=topN(Object.entries(GEO.pays),8,'Autres pays');arr.forEach(x=>x.drill=(x.key==='France'||!!GEO.foreign[x.key]));return {title:'Provenance par pays',slices:arr};}
+      return {title:'France par département',slices:deptSlices(10)};
+    }
+    function rightData(){
+      if(!sel||sel==='__autres')return null;
+      if(kind==='pays'){
+        if(sel==='France')return {title:'France par département',slices:deptSlices(12)};
+        if(GEO.foreign[sel])return {title:sel+' par ville',slices:citySlices(GEO.foreign[sel].v)};
+        return null;
+      }
+      if(!GEO.fr[sel])return null;
+      return {title:deptLabel(sel)+' par ville',slices:citySlices(GEO.fr[sel].v)};
+    }
+    function crumb(){
+      let html;
+      if(kind==='pays')html='Pays'+(sel?` › <b>${sel}</b>`:'');
+      else html=`<a href="#" data-b="1" style="color:var(--rust);text-decoration:none">Pays</a> › France › <b>${deptLabel(sel)}</b>`;
+      const c=document.getElementById('fgcrumb');c.innerHTML=html;
+      const a=c.querySelector('a[data-b]');if(a)a.onclick=e=>{e.preventDefault();kind='pays';sel='France';render();};
+    }
+    function donut(cv,tid,lid,d,onSlice,selKey){
+      const el=document.getElementById(cv),tt=document.getElementById(tid),gl=document.getElementById(lid);
+      const ex=Chart.getChart(el);if(ex)ex.destroy();
+      if(!d){tt.textContent='';gl.innerHTML='<div style="color:var(--muted);font-size:12px;padding:24px 0;text-align:center">Cliquez une part à gauche pour le détail →</div>';return;}
+      const tot=d.slices.reduce((s,x)=>s+x.n,0)||1;const cols=d.slices.map((x,i)=>grayLbl(x.label)?GRAY:PAL[i%PAL.length]);
+      const offs=d.slices.map(x=>selKey&&x.key===selKey?16:0);
+      tt.textContent=tot.toLocaleString('fr-FR')+' · '+d.title;
+      let lg='';d.slices.forEach((x,i)=>{const p=Math.round(x.n/tot*100);const clk=onSlice&&x.key!=='__autres';lg+=`<div data-i="${i}" class="fgrow" style="display:flex;align-items:center;gap:8px;padding:2px 0;cursor:${clk?'pointer':'default'}"><span style="width:9px;height:9px;border-radius:2px;background:${cols[i]};flex:none"></span><span style="flex:1;color:${(selKey&&x.key===selKey)?'var(--rust)':(clk?'var(--ink)':'var(--muted)')}">${x.label}${x.drill&&onSlice?' ▸':''}</span><span style="font-weight:600">${x.n}</span><span style="color:var(--muted);width:34px;text-align:right">${p}%</span></div>`;});
+      gl.innerHTML=lg;gl.querySelectorAll('.fgrow').forEach(row=>{if(onSlice)row.onclick=()=>onSlice(d.slices[+row.dataset.i]);});
+      new Chart(el,{type:'doughnut',data:{labels:d.slices.map(x=>x.label),datasets:[{data:d.slices.map(x=>x.n),backgroundColor:cols,borderColor:'#fff',borderWidth:2,offset:offs}]},options:{responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{display:false},tooltip:{callbacks:{label:it=>it.label+' : '+it.parsed+' ('+Math.round(it.parsed/tot*100)+'%)'}}},onClick:(e,elx)=>{if(elx.length&&onSlice)onSlice(d.slices[elx[0].index]);}}});
+    }
+    function clickLeft(s){if(!s||s.key==='__autres')return;sel=s.key;render();}
+    function clickRight(s){if(!s||!s.drill)return;if(kind==='pays'&&sel==='France'){kind='frdept';sel=s.key;render();}}
+    function render(){crumb();donut('fgpieA','fgtitleA','fglistA',leftData(),clickLeft,sel);donut('fgpieB','fgtitleB','fglistB',rightData(),clickRight,null);}
+    render();
+  }
+}
+function renderPhares(){
+  const V=DATA.ventes;if(!V||!V.cuvees)return '';const yNow=new Date().getFullYear();
+  const y25=V.years.q25||'2025',y26=V.years.q26||'2026';
+  const actOf=(a,b)=>a>0&&b<=0?['À relancer','perdu']:(a<=0&&b>0?['Nouveau','nouv']:(b<a?['En baisse','bai']:['Fidèle','sta']));
+  let h='';
+  for(const cu of PHARES){const C=V.cuvees[cu];if(!C)continue;const col=COLOR[cu]||'Rouge';
+    const milAgg=Object.entries(C.mils).filter(([m])=>/^\d{4}$/.test(m)).map(([m,M])=>{let q25=0,q26=0;for(const cli in M.clients){q25+=M.clients[cli].q25;q26+=M.clients[cli].q26;}return {m,M,q25,q26};}).sort((a,b)=>a.m-b.m);
+    const t25=milAgg.reduce((s,x)=>s+x.q25,0),t26=milAgg.reduce((s,x)=>s+x.q26,0);
+    h+=`<div class="phare"><div class="phare-h fill ${col}"><span class="pname">${cap(cu)}</span><span class="pcolor">${col}</span><span class="ptot">${int0(t25)} → ${int0(t26)} btes commandées</span></div><div class="phare-body">`;
+    for(const x of milAgg){const old=(+x.m)<=yNow-5;
+      const clients=Object.entries(x.M.clients).map(([c,q])=>({c,q25:q.q25,q26:q.q26})).filter(o=>o.q25||o.q26).sort((a,b)=>Math.max(b.q25,b.q26)-Math.max(a.q25,a.q26));
+      const relance=clients.filter(o=>o.q25>0&&o.q26<=0).length;
+      h+=`<details class="mil"${old&&relance?' open':''}><summary><span class="myr">${x.m}${old?' <span class="oldtag">ancien</span>':''}</span><span class="msum">${int0(x.q25)} → ${int0(x.q26)} btes · ${clients.length} clients${relance?` · <b class="neg">${relance} à relancer</b>`:''}</span></summary><div class="millist"><table><thead><tr><th class="l">Client</th><th>Qté ${y25}</th><th>Qté ${y26}</th><th>Δ</th><th class="l">Action</th></tr></thead><tbody>`;
+      for(const o of clients){const d=o.q26-o.q25;const[act,cls]=actOf(o.q25,o.q26);
+        h+=`<tr><td class="l">${o.c}</td><td class="num">${o.q25?int0(o.q25):'—'}</td><td class="num">${o.q26?int0(o.q26):'—'}</td><td class="num ${sign(d)}">${(d>=0?'+':'')+int0(d)}</td><td class="l"><span class="chip ${cls}">${act}</span></td></tr>`;}
+      h+=`</tbody></table></div></details>`;
+    }
+    h+=`</div></div>`;
+  }
+  h+=`<div class="legend"><span>Par cuvée puis par millésime : dépliez un millésime pour la liste défilante des clients (quantités commandées ${y25} vs ${y26}, ordre décroissant). <span class="chip perdu">À relancer</span> = commandait ce millésime, rien en ${y26} → prioritaire pour écouler les vieux millésimes · <span class="chip bai">En baisse</span> · <span class="chip nouv">Nouveau</span> · <span class="chip sta">Fidèle</span>. « ancien » = millésime ≥ 5 ans (ouvert par défaut si des clients sont à relancer).</span></div>`;
+  return h;
+}
+/* ----- Cuvée × canal ----- */
+function renderCuveeCanal(){
+  const R=DATA.cuveesRep;const macroOf=rp=>CONS.has(rp)?'VENTE DIRECTE':(rp==='Export'?'EXPORT':'PRO');
+  const cuv={};
+  for(const rp in R)for(const cu in R[rp]){const caN=R[rp][cu].caN;if(!caN)continue;
+    const o=cuv[cu]=cuv[cu]||{tot:0,m:{'VENTE DIRECTE':0,'PRO':0,'EXPORT':0},top:{}};
+    o.tot+=caN;o.m[macroOf(rp)]+=caN;o.top[rp]=(o.top[rp]||0)+caN;}
+  const ents=Object.entries(cuv).sort((a,b)=>b[1].tot-a[1].tot);
+  const grand=ents.reduce((s,[,v])=>s+v.tot,0)||1;
+  let h=`<div class="tw"><table><thead><tr><th class="l">Cuvée</th><th>Consommateurs</th><th>PRO</th><th>Export</th><th>Total N</th><th>Part</th><th class="l">Canal n°1</th></tr></thead><tbody>`;
+  const mt={'VENTE DIRECTE':0,'PRO':0,'EXPORT':0};
+  for(const [cu,v] of ents){const t1=Object.entries(v.top).sort((a,b)=>b[1]-a[1])[0];for(const k in mt)mt[k]+=v.m[k];
+    h+=`<tr><td class="l">${cap(cu)}</td><td class="num">${eur0(v.m['VENTE DIRECTE'])}</td><td class="num">${eur0(v.m['PRO'])}</td><td class="num">${eur0(v.m['EXPORT'])}</td><td class="num">${eur0(v.tot)}</td><td class="num">${Math.round(v.tot/grand*100)} %</td><td class="l">${t1?t1[0]+' <span style="color:var(--muted)">('+Math.round(t1[1]/v.tot*100)+' %)</span>':'—'}</td></tr>`;}
+  h+=`<tr class="tot"><td class="l">TOTAL</td><td class="num">${eur(mt['VENTE DIRECTE'])}</td><td class="num">${eur(mt['PRO'])}</td><td class="num">${eur(mt['EXPORT'])}</td><td class="num">${eur(grand)}</td><td class="num">100 %</td><td></td></tr></tbody></table></div>
+    <div class="legend"><span>CA de l'année N par cuvée, ventilé en macro-canaux. « Canal n°1 » = représentant qui pèse le plus sur la cuvée. La matrice complète par canal est dans l'export Excel.</span></div>`;
+  return h;
+}
+/* ----- Couverture stock ----- */
+function renderCouverture(){
+  const stock=DATA.stock,cuv=DATA.cuvees;const resaCuv=DATA.resa?DATA.resa.byCuvee:{};
+  let h=`<div class="tw"><table><thead><tr><th class="l">Cuvée</th><th>Stock 75 cl (net)</th><th>Résa pipeline</th><th>Dispo</th><th>Vendu N (btes)</th><th>Couverture</th></tr></thead><tbody>`;
+  const jours = DATA.periods?daysBetween(DATA.periods.curStart,DATA.periods.curEnd):191;
+  for(const cu of Object.keys(stock)){const s=stock[cu].dispo;const resv=resaCuv[cu]||0;const net=s;
+    const vendu=cuv[cu]?cuv[cu].btes26:0;const rate=vendu>0?vendu/jours:0;// btes/jour
+    const cov=rate>0?net/rate:null;// jours restants
+    const covm=cov!=null?cov/30:null;
+    let badge=covm==null?'—':covm<2?'<span class="chip bai">'+covm.toFixed(1)+' mois</span>':covm>18?'<span class="chip sta">'+Math.round(covm)+' mois</span>':'<span class="chip nouv">'+covm.toFixed(1)+' mois</span>';
+    h+=`<tr><td class="l">${cu.charAt(0)+cu.slice(1).toLowerCase()}</td><td class="num">${int0(s)}</td><td class="num">${resv?int0(resv):'—'}</td><td class="num">${int0(net)}</td><td class="num">${int0(vendu)}</td><td class="num">${badge}</td></tr>`;}
+  h+=`</tbody></table></div><div class="legend"><span>Couverture = stock net ÷ rythme de vente observé sur la période. <span class="chip bai">&lt; 2 mois</span> rupture proche · <span class="chip sta">&gt; 18 mois</span> surstock.</span></div>`;
+  return h;
+}
+function daysBetween(a,b){const p=s=>{const[d,m,y]=s.split('/').map(Number);return new Date(y,m-1,d);};return Math.max(1,Math.round((p(b)-p(a))/86400000));}
+function renderStockHO(){
+  const H=DATA.stockho;if(!H||!H.length)return '';const mx=Math.max(...H.map(x=>x.qty),1);
+  let h=`<div class="tw"><table><thead><tr><th class="l">Conditionnement</th><th class="l">Millésime</th><th>Stock</th><th class="l">Répartition</th></tr></thead><tbody>`;
+  H.slice().sort((a,b)=>b.qty-a.qty).forEach(x=>{h+=`<tr><td class="l">${x.conditionnement}</td><td class="l">${x.millesime||'—'}</td><td class="num">${int0(x.qty)}</td><td class="l"><div class="track" style="width:180px;display:inline-block;vertical-align:middle"><div class="fill g" style="width:${Math.max(3,x.qty/mx*100)}%"></div></div></td></tr>`;});
+  h+=`</tbody></table></div><div class="legend"><span>Stock disponible par conditionnement (bouteille, bidon…). Source : état des stocks hors vins.</span></div>`;
+  return h;
+}
+function renderStockSimple(){const stock=DATA.stock;const ents=Object.entries(stock).sort((a,b)=>b[1].dispo-a[1].dispo);const mx=Math.max(...ents.map(([,v])=>v.dispo));
+  return ents.map(([cu,v])=>`<div class="bar-row"><div class="cn">${cu.charAt(0)+cu.slice(1).toLowerCase()}<small>${v.color}</small></div><div class="track"><div class="fill ${v.color}" style="width:${Math.max(2,v.dispo/mx*100)}%"></div></div><div class="qt">${int0(v.dispo)}</div></div>`).join('');}
+
+/* ----- Encours ----- */
+function renderEncours(){
+  const {agg,clients}=DATA.encours;const labels=['+120 j','91-120 j','61-90 j','31-60 j','0-30 j','Non échu'];
+  const cols=['#7a2410','#9E3B1C','#C2703B','#E0AE3A','#B0851F','#6E7355'];
+  const tot=agg?agg[6]:clients.reduce((s,c)=>s+c.total,0);
+  const parts=agg?agg.slice(0,6):[];const psum=parts.reduce((s,v)=>s+Math.max(0,v),0)||1;
+  let h='';
+  if(agg){h+=`<div class="aging">`+parts.map((v,i)=>{const w=Math.max(0,v)/psum*100;return w>0?`<span style="width:${w}%;background:${cols[i]}" title="${labels[i]}: ${eur(v)}">${w>8?labels[i]:''}</span>`:'';}).join('')+`</div>`;
+    h+=`<div class="legend">`+labels.map((l,i)=>`<span><i style="background:${cols[i]}"></i>${l} · ${eur0(parts[i])}</span>`).join('')+`</div>`;}
+  const top=clients.slice().sort((a,b)=>b.total-a.total).slice(0,10);
+  h+=`<div class="tw" style="margin-top:16px"><table><thead><tr><th class="l">Client</th><th>Encours</th><th>Part</th></tr></thead><tbody>`;
+  for(const c of top)h+=`<tr><td class="l">${c.label}</td><td class="num">${eur0(c.total)}</td><td class="num">${tot>0?Math.round(c.total/tot*100):0} %</td></tr>`;
+  h+=`<tr class="tot"><td class="l">TOTAL ENCOURS</td><td class="num">${eur(tot)}</td><td class="num">100 %</td></tr></tbody></table></div>`;
+  return h;
+}
+function renderRelances(){
+  const R=DATA.relances;
+  const grand=(R.total+R.nonTotal)||1;
+  const relance=R.buckets.slice(4).reduce((s,b)=>s+b.total,0); // retard > 120 j
+  const mx=Math.max(...R.list.map(x=>x.solde),1);
+  const stat=(l,v,sub,c)=>`<div class="statblk"><div class="sl">${l}</div><div class="sv num ${c||''}">${v}</div>${sub?`<div class="ss">${sub}</div>`:''}</div>`;
+  let h=`<div class="statrow">${stat('Encours échu',eur(R.total),R.list.length+' factures en retard','neg')}${stat('À relancer (retard > 120 j)',eur(relance),R.total?Math.round(relance/R.total*100)+' % du total échu':'','neg')}${stat('Non échus',eur(R.nonTotal),R.nonCount+' factures dans le délai 30 j')}</div>`;
+  h+=`<div class="segbar">`+R.tranches.map(b=>{const w=b.total/grand*100;return w>0?`<span style="width:${w}%;background:${b.col};${b.echu?'':'opacity:.7'}" title="${b.lab} · ${eur(b.total)}"></span>`:'';}).join('')+`</div>`;
+  h+=`<div class="seglegend">`+R.tranches.map(b=>`<span><i style="background:${b.col}"></i>${b.lab} · <b>${eur0(b.total)}</b> <em>(${b.count})</em></span>`).join('')+`</div>`;
+  const moLbl=a=>{if(a<=0)return 'à échoir';if(a<30)return a+' j';const m=Math.round(a/30);return m<12?m+' mois':((a/365).toFixed(1).replace('.',',')+' an'+(a>=730?'s':''));};
+  const pad=n=>('0'+n).slice(-2);
+  const byCli={};R.list.forEach(r=>{(byCli[r.client]=byCli[r.client]||[]).push(r);});
+  const cli=Object.entries(R.byC).map(([c,v])=>({c,...v,items:(byCli[c]||[]).sort((a,b)=>b.solde-a.solde)})).sort((a,b)=>b.total-a.total);
+  const t80=(()=>{let s=0,i=0;for(;i<cli.length;i++){s+=cli[i].total;if(s>=R.total*0.8)break;}return Math.min(i+1,cli.length);})();
+  h+=`<div class="relhead">Relances prioritaires par client <span>${cli.length} clients${cli.length?` · top ${t80} = 80 % du total échu · cliquez pour le détail`:''}</span></div>`;
+  let cum=0;
+  h+=cli.map(o=>{cum+=o.total;const p=Math.round(cum/(R.total||1)*100);
+    const inv=o.items.map(r=>{const d=r.date;const dd=pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+String(d.getFullYear()).slice(-2);return `<tr><td class="l">${dd}</td><td class="l">${moLbl(r.retard)} de retard</td><td class="num">${eur0(r.solde)}</td></tr>`;}).join('');
+    return `<details class="mil"><summary><span class="myr"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${o.col};flex:none"></span>${o.c}</span><span class="msum">${o.count} facture${o.count>1?'s':''} · <b>${eur0(o.total)}</b> · retard max ${moLbl(o.oldest)} · cumul ${p} %</span></summary><div class="millist"><table><thead><tr><th class="l">Date facture</th><th class="l">Retard</th><th>Montant</th></tr></thead><tbody>${inv}</tbody></table></div></details>`;}).join('');
+  h+=`<div class="legend"><span>Paiement 30 j net · retard compté depuis l'échéance (date de facture + 30 j) · édition du ${R.ref}. Jauge : longueur ∝ montant, couleur ∝ retard (clair = récent → foncé = ancien).${R.nonTop.length?` Non échus (dans le délai) — dont ${R.nonTop.map(r=>r.client+' '+eur0(r.solde)).join(', ')}.`:''}</span></div>`;
+  return h;
+}
+
+/* ----- Carnet / Résa ----- */
+function renderDoc(d,mot){
+  let h=`<div class="kpis" style="grid-template-columns:repeat(3,1fr)"><div class="kpi"><div class="l">Total ${mot}</div><div class="v num">${eur(d.total)}</div></div>`;
+  if(d.eq75)h+=`<div class="kpi"><div class="l">Équivalent 75 cl</div><div class="v num">${int0(d.eq75)}</div><div class="s" style="color:var(--muted)">bouteilles</div></div>`;
+  h+=`</div>`;
+  const ents=Object.entries(d.byCuvee).filter(([,v])=>v).sort((a,b)=>b[1]-a[1]);
+  if(ents.length){const mx=Math.max(...ents.map(([,v])=>v));
+    h+=`<div style="margin-top:16px;font-size:12px;color:var(--muted)">Par cuvée</div>`;
+    for(const [cu,v] of ents)h+=`<div class="bar-row"><div class="cn">${cu.charAt(0)+cu.slice(1).toLowerCase()}</div><div class="track"><div class="fill g" style="width:${Math.max(2,v/mx*100)}%"></div></div><div class="qt">${eur0(v)}</div></div>`;}
+  return h;
+}
+/* ----- Huile ----- */
+function renderHuile(){const d=DATA.huile;const delta=d.ca26-d.ca25,dp=d.ca25>0?delta/d.ca25:0;
+  return `<div class="kpis" style="grid-template-columns:repeat(3,1fr)"><div class="kpi"><div class="l">CA huile N</div><div class="v num">${eur(d.ca26)}</div><div class="s ${sign(delta)}">${pct(dp)} vs N-1</div></div><div class="kpi"><div class="l">CA huile N-1</div><div class="v num">${eur(d.ca25)}</div></div><div class="kpi"><div class="l">Δ</div><div class="v num ${sign(delta)}">${(delta>=0?'+':'')+eur(delta)}</div></div></div>`;}
+
+/* ============ Prévision & budget ============ */
+const BUDGET_ALIAS={'caveau':'Caveau','caveau pro':'Caveau Pro.','site/mail':'Site/Mail','direct 84':'Clients en Direct 84','direct 13':'Clients en Direct 13','direct 06':'Clients en Direct 06','direct':'Clients en Direct','alpilles':'Alpilles direct','jr':'Les Agapes (Alpilles)','jr hors alpilles':'Les Agapes (Hors Alpilles)','tvn':'Terroirs et vins nobles','arom':'Arom Vins','lcb':'La Carafe Bleue (13)','casier à vins':'Le Casier à vins','export':'Export','nouveaux':'Nouveaux (non affecté)'};
+async function parseVentes(file){
+  const txt=new TextDecoder('windows-1252').decode(await file.arrayBuffer());
+  const lines=txt.split(/\r?\n/).filter(l=>l.trim());if(!lines.length)return null;
+  const head=lines[0].split(';');const ix=n=>head.indexOf(n);
+  const iC=ix('Libellé'),iM=ix('Millésime article'),iT=ix('Nom tiers'),iQ=ix('Quantité unit'),iMT=ix('Mt HT'),iDt=ix('Date document');
+  const num=x=>{const v=parseFloat(String(x||'').replace(/[\u00a0 ]/g,'').replace(',','.'));return isNaN(v)?0:v;};
+  const cuvees={};let year='';
+  for(let i=1;i<lines.length;i++){const r=lines[i].split(';');if(r.length<=iMT)continue;
+    const cu=(r[iC]||'').trim().toUpperCase();if(!cu)continue;
+    let mil=(r[iM]||'').trim();if(mil.length===2)mil='20'+mil;if(!/^\d{4}$/.test(mil))mil='';
+    const cli=(r[iT]||'').trim();const q=num(r[iQ]),mt=num(r[iMT]);
+    if(!year&&iDt>=0&&(r[iDt]||'').length>=4)year=r[iDt].slice(-4);
+    const C=cuvees[cu]=cuvees[cu]||{mt:0,mils:{}};C.mt+=mt;
+    const M=C.mils[mil]=C.mils[mil]||{clients:{}};M.clients[cli]=(M.clients[cli]||0)+q;
+  }
+  return {year,cuvees};
+}
+function mergeVentes(v){
+  DATA.ventes=DATA.ventes||{years:{},cuvees:{}};
+  const key=(v.year>='2026')?'q26':'q25';DATA.ventes.years[key]=v.year;
+  for(const cu in v.cuvees){const src=v.cuvees[cu];const C=DATA.ventes.cuvees[cu]=DATA.ventes.cuvees[cu]||{mt25:0,mt26:0,mils:{}};
+    C[key==='q26'?'mt26':'mt25']+=src.mt;
+    for(const mil in src.mils){const M=C.mils[mil]=C.mils[mil]||{clients:{}};
+      for(const cli in src.mils[mil].clients){const cl=M.clients[cli]=M.clients[cli]||{q25:0,q26:0};cl[key]+=src.mils[mil].clients[cli];}}}
+}
+const WINE_FAM=new Set(['ALPILLES ROUGE','ALPILLES BLANC','ALPILLES ROSE']);
+const PART_FAM=new Set(['PARTI','FAM']);
+async function parseFidelite(file){
+  const txt=new TextDecoder('windows-1252').decode(await file.arrayBuffer());
+  const lines=txt.split(/\r?\n/).filter(l=>l.trim());if(!lines.length)return null;
+  const head=lines[0].split(';');const ix=n=>head.indexOf(n);
+  const iT=ix('Nom tiers'),iMt=ix('Mt HT'),iEq=ix('Eq75'),iTy=ix('Type du document ligne doc'),iFA=ix('Libellé famille article'),iFam=ix('Famille tiers'),iDt=ix('Date document'),iRep=ix('Nom représentant Client');
+  if(iT<0||iMt<0)return null;
+  const num=x=>{const v=parseFloat(String(x||'').replace(/[\u00a0 ]/g,'').replace(',','.'));return isNaN(v)?0:v;};
+  const norm=s=>String(s||'').trim().replace(/\s+/g,' ').toLowerCase();
+  const clients={};const years=new Set();
+  for(let i=1;i<lines.length;i++){const r=lines[i].split(';');if(r.length<=iMt)continue;
+    const ty=(r[iTy]||'').trim();if(ty!=='FA'&&ty!=='AV')continue;
+    if(!WINE_FAM.has((r[iFA]||'').trim()))continue;
+    const name=(r[iT]||'').trim();if(!name)continue;
+    const d=(r[iDt]||'').trim();const y=d.length>=4?d.slice(-4):'';if(!/^\d{4}$/.test(y))continue;years.add(y);
+    const fam=(r[iFam]||'').trim();const rep=iRep>=0?(r[iRep]||'').trim():'';const key=norm(name);
+    const o=clients[key]=clients[key]||{name,fam,repCA:{},by:{}};
+    const mt=num(r[iMt]);const b=o.by[y]=o.by[y]||{ca:0,eq:0};b.ca+=mt;b.eq+=iEq>=0?num(r[iEq]):0;
+    o.repCA[rep]=(o.repCA[rep]||0)+mt;
+  }
+  return {years:[...years],clients};
+}
+const VD_REP=new Set(['caveau','caveau pro.','site/mail','']);
+function fidMacro(o){let best='',bv=-1;const R=o.repCA||{};for(const r in R){if(R[r]>bv){bv=R[r];best=r;}}return VD_REP.has(best.trim().toLowerCase())?'VD':'PRO';}
+function mergeFidelite(p){
+  if(!p)return;const F=DATA.fidelite=DATA.fidelite||{years:new Set(),clients:{}};
+  p.years.forEach(y=>F.years.add(y));
+  for(const k in p.clients){const s=p.clients[k];const o=F.clients[k]=F.clients[k]||{name:s.name,fam:s.fam,repCA:{},by:{}};
+    if(!o.fam&&s.fam)o.fam=s.fam;o.repCA=o.repCA||{};
+    for(const rep in (s.repCA||{}))o.repCA[rep]=(o.repCA[rep]||0)+s.repCA[rep];
+    for(const y in s.by){const b=o.by[y]=o.by[y]||{ca:0,eq:0};b.ca+=s.by[y].ca;b.eq+=s.by[y].eq;}}
+}
+async function parseBudget(file){
+  try{const wb=XLSX.read(await file.arrayBuffer(),{type:'array'});const map={};
+    const gsh=wb.Sheets['Général']||wb.Sheets[wb.SheetNames[0]];
+    const aoa=XLSX.utils.sheet_to_json(gsh,{header:1});
+    let caCol=15;for(const row of aoa){if(!row)continue;const j=row.findIndex(v=>v===2026||v==='2026');if(j>=0){caCol=j+2;break;}}
+    for(const row of aoa){if(!row||!row[0])continue;const lab=String(row[0]).trim().toLowerCase();if(lab==='totale'||lab==='global')continue;const canal=BUDGET_ALIAS[lab];if(!canal)continue;const ca=row[caCol];if(typeof ca==='number')map[canal]=(map[canal]||0)+ca;}
+    const psh=wb.Sheets['ExportPrimeurs'];
+    if(psh){let prim=0;const pa=XLSX.utils.sheet_to_json(psh,{header:1});for(const row of pa){if(!row)continue;for(let i=3;i<row.length;i+=3){if(typeof row[i]==='number')prim+=row[i];}}if(prim>0)map['Export']=(map['Export']||0)+prim;}
+    return Object.keys(map).length?map:null;
+  }catch(e){return null;}
+}
+function parseParticuliers(wb){
+  const sh=wb.Sheets[wb.SheetNames[0]];const aoa=XLSX.utils.sheet_to_json(sh,{header:1});if(!aoa.length)return null;
+  const head=aoa[0].map(h=>String(h==null?'':h).trim());
+  const iName=head.findIndex(h=>/Nom.*Client/i.test(h)),iCP=head.findIndex(h=>/Code\s*Postal/i.test(h)),iPays=head.findIndex(h=>/Pays/i.test(h)),iVille=head.findIndex(h=>/^ville$|commune|localit/i.test(h));
+  if(iName<0)return null;
+  const eqCol={},mtCol={},ys=new Set();
+  head.forEach((h,j)=>{let m=h.match(/Equivalent\s*75\s*\|?\s*(\d{4})/i);if(m){eqCol[m[1]]=j;ys.add(m[1]);}m=h.match(/Mt\s*Ht\s*\|?\s*(\d{4})/i);if(m){mtCol[m[1]]=j;ys.add(m[1]);}});
+  const years=[...ys].sort();const norm=s=>String(s||'').trim().replace(/\s+/g,' ').toLowerCase();const isAgg=s=>/^particuliers?$/i.test(String(s||'').trim());
+  const map=new Map();
+  for(let r=1;r<aoa.length;r++){const row=aoa[r];if(!row)continue;const name=String(row[iName]==null?'':row[iName]).trim();if(!name)continue;
+    const key=norm(name);let o=map.get(key);
+    if(!o){o={name,cp:iCP>=0&&row[iCP]!=null?String(row[iCP]).trim():'',ville:iVille>=0?String(row[iVille]||'').trim():'',pays:iPays>=0?String(row[iPays]||'').trim():'',isAgg:isAgg(name),by:{}};map.set(key,o);}
+    else{if(!o.pays&&iPays>=0&&row[iPays])o.pays=String(row[iPays]).trim();if(!o.cp&&iCP>=0&&row[iCP]!=null)o.cp=String(row[iCP]).trim();if(!o.ville&&iVille>=0&&row[iVille])o.ville=String(row[iVille]).trim();}
+    for(const y of years){const eq=eqCol[y]!=null?Number(row[eqCol[y]]):NaN,mt=mtCol[y]!=null?Number(row[mtCol[y]]):NaN;
+      if((!isNaN(eq)&&eq!==0)||(!isNaN(mt)&&mt!==0)){const b=o.by[y]=o.by[y]||{eq:0,mt:0};if(!isNaN(eq))b.eq+=eq;if(!isNaN(mt))b.mt+=mt;}}}
+  const rows=[...map.values()];const totals={};
+  for(const y of years){let mt=0,eq=0,n=0;for(const o of rows){const b=o.by[y];if(b){mt+=b.mt;eq+=b.eq;n++;}}totals[y]={mt,eq,n};}
+  return {years,rows,totals};
+}
+function computeForecast(){
+  if(DATA.cuvees&&DATA.cuveesFY){DATA.fcCuvee={};
+    for(const c in DATA.cuvees){const cu=DATA.cuvees[c],ref=DATA.cuveesFY[c]||{ca:0,btes:0};
+      const y26=cu.ca26,y25=cu.ca25,b26=cu.btes26||0,b25=cu.btes25||0;
+      const resteCa=ref.ca-y25,resteB=(ref.btes||0)-b25,fact=y25>0?y26/y25:1,tend=y25>0?y26/y25-1:null;
+      const sim1=y26+resteCa,sim2=y26+resteCa*fact,sim1b=Math.round(b26+resteB),sim2b=Math.round(b26+resteB*fact);
+      const stock=DATA.stock&&DATA.stock[c]?DATA.stock[c].dispo:null;
+      const covS1=stock!=null?Math.round(stock-resteB):null,covS2=stock!=null?Math.round(stock-resteB*fact):null;
+      const besS1=stock!=null?Math.max(0,Math.round(resteB-stock)):null,besS2=stock!=null?Math.max(0,Math.round(resteB*fact-stock)):null;
+      DATA.fcCuvee[c]={y26,b26,fy:ref.ca,resteCa,resteB,tend,fact,sim1,sim2,sim1b,sim2b,stock,covS1,covS2,besS1,besS2};}}
+  if(DATA.clients&&DATA.canalFY){DATA.fcCanal={};const byC={};
+    DATA.clients.forEach(c=>{(byC[c.canal]=byC[c.canal]||{y25:0,y26:0}).y25+=c.ca25;byC[c.canal].y26+=c.ca26;});
+    const allC=new Set([...Object.keys(byC),...Object.keys(DATA.canalFY)]);
+    for(const cn of allC){const y25=byC[cn]?byC[cn].y25:0,y26=byC[cn]?byC[cn].y26:0,fy=DATA.canalFY[cn]||0;
+      const reste=fy-y25,tend=y25>0?y26/y25:1;DATA.fcCanal[cn]={y25,y26,fy,reste,tend,sim1:y26+reste,sim2:y26+reste*tend};}
+    const macroOf=rep=>CONS.has(rep)?'VENTE DIRECTE':(rep==='Export'?'EXPORT':'PRO');
+    const M={};const addM=m=>{M[m]=M[m]||{y25:0,y26:0,fy:0};};
+    DATA.clients.forEach(c=>{addM(c.macro);M[c.macro].y25+=c.ca25;M[c.macro].y26+=c.ca26;});
+    for(const rp in DATA.canalFY){const m=macroOf(rp);addM(m);M[m].fy+=DATA.canalFY[rp];}
+    DATA.fcMacro={};for(const m in M){const{y25,y26,fy}=M[m];const reste=fy-y25,tend=y25>0?y26/y25:1;DATA.fcMacro[m]={y25,y26,fy,reste,tend,sim1:y26+reste,sim2:y26+reste*tend};}
+  }
+}
+const cap=c=>c.charAt(0)+c.slice(1).toLowerCase();
+function restePeriodLabel(){
+  if(!DATA.periods||!DATA.periods.curEnd)return ' (reste de l\'année)';
+  const p=DATA.periods.curEnd.split('/').map(Number);const dt=new Date(p[2],p[1]-1,p[0]);dt.setDate(dt.getDate()+1);
+  const dd=String(dt.getDate()).padStart(2,'0'),mm=String(dt.getMonth()+1).padStart(2,'0');
+  return ` (${dd}/${mm}→31/12)`;
+}
+function renderSynthese(){
+  const cl=DATA.clients||[];
+  const caN=DATA.cuvees?Object.values(DATA.cuvees).reduce((s,v)=>s+v.ca26,0):cl.reduce((s,c)=>s+c.ca26,0);
+  const caP=DATA.cuvees?Object.values(DATA.cuvees).reduce((s,v)=>s+v.ca25,0):cl.reduce((s,c)=>s+c.ca25,0);
+  const dP=caP>0?(caN-caP)/caP:0;
+  const proj=DATA.fcCuvee?Object.values(DATA.fcCuvee).reduce((s,v)=>s+v.sim1,0):(DATA.fcMacro?Object.values(DATA.fcMacro).reduce((s,v)=>s+v.sim1,0):null);
+  const fyTot=DATA.fcCuvee?Object.values(DATA.fcCuvee).reduce((s,v)=>s+(v.fy||0),0):0;
+  const stockTot=DATA.stock?Object.values(DATA.stock).reduce((s,v)=>s+v.dispo,0):null;
+  const kpi=(l,v,sub,c)=>`<div class="kpi"><div class="l">${l}</div><div class="v num ${c||''}">${v}</div>${sub?`<div class="s ${c||''}">${sub}</div>`:''}</div>`;
+  const md=m=>{const cs=cl.filter(c=>c.macro===m);const n=cs.reduce((s,c)=>s+c.ca26,0),p=cs.reduce((s,c)=>s+c.ca25,0);
+    const nr=cs.filter(c=>c.cat==='Non renouvelé');
+    return {caN:n,caP:p,dP:p>0?(n-p)/p:0,actifs:cs.filter(c=>c.ca26>0).length,perdus:nr.length,perdusCA:nr.reduce((s,c)=>s+c.ca25,0)};};
+  const PRO=md('PRO'),CO=md('VENTE DIRECTE'),EX=md('EXPORT');
+  // --- Général ---
+  let h=`<div class="sec"><div class="sec-h"><h2>Général</h2><span class="note">${DATA.periods?`cumuls au ${DATA.periods.prevEnd} et au ${DATA.periods.curEnd}`:''}</span></div><div class="kpis">`;
+  h+=`<div class="kpi big"><div class="l">Chiffre d'affaires vins</div><div class="v num">${eur(caN)}</div><div class="s ${sign(caN-caP)}">${pct(dP)} vs N-1 · ${(caN-caP>=0?'+':'')+eur(caN-caP)}</div></div>`;
+  if(proj!=null)h+=kpi('Projection annuelle (SIM 1)',eur(proj),fyTot>0?pct((proj-fyTot)/fyTot)+' vs 2025':'estimation',fyTot>0?sign(proj-fyTot):'');
+  if(stockTot!=null)h+=kpi('Stock 75 cl',int0(stockTot)+' btes','disponible','');
+  h+=`</div></div>`;
+  // --- Vins ---
+  h+=`<div class="sec"><div class="sec-h"><h2>Vins</h2><span class="note">CA global · détail par circuit à la demande</span></div><div class="kpis">`;
+  h+=`<div class="kpi big"><div class="l">CA Vins — tous circuits</div><div class="v num">${eur(caN)}</div><div class="s ${sign(caN-caP)}">${pct(dP)} vs N-1</div></div>`;
+  if(DATA.resa)h+=kpi('Réservations',eur(DATA.resa.total),'pipeline réservé','pos');
+  if(DATA.carnet)h+=kpi('Carnet de commandes',eur(DATA.carnet.total),'engagé à venir','pos');
+  h+=`</div>`;
+  const card=(name,d)=>`<div class="kpi"><div class="l">${name}</div><div class="v num" style="font-size:24px">${eur(d.caN)}</div><div class="s ${sign(d.caN-d.caP)}">${pct(d.dP)} vs N-1</div>
+    <div class="detrows"><div><span>Clients actifs</span><b>${int0(d.actifs)}</b></div><div><span>Clients perdus</span><b class="neg">${int0(d.perdus)}</b></div><div><span>CA perdu 2025</span><b class="neg">${eur0(d.perdusCA)}</b></div></div></div>`;
+  h+=`<details class="vinsdet"><summary>Détail par circuit — PRO · Consommateurs · Export</summary><div class="detwrap"><div class="kpis detgrid">${card('PRO',PRO)}${card('Consommateurs',CO)}${card('Export',EX)}</div>
+    <div class="note" style="margin-top:12px">Consommateurs = Caveau, Caveau Pro., Site/Mail, Pas de représentant. Réservations et commandes ne sont pas ventilables par circuit dans les exports actuels (montants globaux ci-dessus).</div></div></details>`;
+  h+=`</div>`;
+  // --- Huile d'olive ---
+  if(DATA.huile){const d=DATA.huile,dl=d.ca26-d.ca25;h+=`<div class="sec"><div class="sec-h"><h2>Huile d'olive</h2><span class="note">CA N vs N-1</span></div><div class="kpis">`;
+    h+=kpi("CA huile (N)",eur(d.ca26),pct(d.ca25>0?dl/d.ca25:0)+' vs N-1',sign(dl));
+    h+=kpi("CA huile (N-1)",eur(d.ca25),'','');
+    h+=kpi("Δ",(dl>=0?'+':'')+eur(dl),'',sign(dl));
+    h+=`</div></div>`;}
+  return h;
+}
+
+function renderAlertes(){
+  const A=[];
+  if(DATA.fcCuvee)Object.entries(DATA.fcCuvee).filter(([,v])=>v.besS1>0).sort((a,b)=>b[1].besS1-a[1].besS1)
+    .forEach(([c,v])=>A.push({lvl:'crit',txt:`<b>${cap(c)}</b> en rupture de stock : manque ${int0(v.besS1)} bouteilles (stock ${int0(v.stock)} bt · ${int0(v.resteB)} à vendre)`}));
+  if(DATA.budget&&DATA.fcCanal){for(const r of budgetRows()){if(/^TOTAL (PRO|Canaux|Export)/.test(r.label)&&r.feu==='Critique')
+    A.push({lvl:'crit',txt:`Budget <b>critique</b> sur ${r.label.replace('TOTAL ','')} : écart +${int0(r.ec)} € (${pct(r.ep)}) vs projection`});}}
+  if(DATA.fcCanal)for(const cn in DATA.fcCanal){const v=DATA.fcCanal[cn];if(v.y25>3000){const d=(v.y26-v.y25)/v.y25;
+    if(d<=-0.15)A.push({lvl:'warn',txt:`Canal <b>${cn}</b> en baisse ${pct(d)} YTD (${eur0(v.y26)} vs ${eur0(v.y25)})`});
+    else if(d>=0.5)A.push({lvl:'info',txt:`Canal <b>${cn}</b> ${pct(d)} YTD — envisager un renfort commercial`});}}
+  if(!A.length)return '';
+  const dot={crit:'var(--rust)',warn:'var(--yellow)',info:'var(--olive)'};const ord={crit:0,warn:1,info:2};
+  A.sort((a,b)=>ord[a.lvl]-ord[b.lvl]);
+  return '<div class="alertes">'+A.map(a=>`<div class="alert"><span class="adot" style="background:${dot[a.lvl]}"></span><span>${a.txt}</span></div>`).join('')+'</div>';
+}
+function renderPrevCuvee(){const f=DATA.fcCuvee;const ents=Object.entries(f).sort((a,b)=>b[1].sim1-a[1].sim1);
+  const ws=DATA.stock;
+  const bt=v=>v==null?'—':Math.round(v).toLocaleString('fr-FR');
+  const btn=v=>v==null?'—':`<span class="${v<0?'neg':''}">${Math.round(v).toLocaleString('fr-FR')}</span>`;
+  const tnd=v=>v==null?'n/d':((v>=0?'+':'')+Math.round(v*100)+' %');
+  let h=`<div class="tw"><table><thead>
+    <tr><th class="l" rowspan="2">Cuvée</th><th colspan="2">Vendu réel YTD 2026</th><th colspan="2">Historique reste 2025${restePeriodLabel()}</th><th rowspan="2">Tendance 2026/2025</th><th colspan="2">SIM 1 : réel + reste 2025</th><th colspan="2">SIM 2 : réel + reste 2025 × tend.</th>${ws?'<th rowspan="2">Stock 75 cl dispo.</th><th colspan="2">Couverture stock vs reste à vendre (Btes)</th><th colspan="2">Besoin de production (Btes)</th>':''}</tr>
+    <tr><th>CA HT</th><th>Btes</th><th>CA HT</th><th>Btes</th><th>CA HT</th><th>Btes</th><th>CA HT</th><th>Btes</th>${ws?'<th>SIM 1</th><th>SIM 2</th><th>SIM 1</th><th>SIM 2</th>':''}</tr></thead><tbody>`;
+  const T={y26:0,b26:0,resteCa:0,resteB:0,sim1:0,sim1b:0,sim2:0,sim2b:0};
+  for(const [cu,v] of ents){for(const k in T)T[k]+=v[k]||0;
+    h+=`<tr><td class="l">${cap(cu)}</td><td class="num">${eur0(v.y26)}</td><td class="num">${bt(v.b26)}</td><td class="num">${eur0(v.resteCa)}</td><td class="num">${bt(v.resteB)}</td><td class="num">${tnd(v.tend)}</td><td class="num">${eur0(v.sim1)}</td><td class="num">${bt(v.sim1b)}</td><td class="num">${eur0(v.sim2)}</td><td class="num">${bt(v.sim2b)}</td>${ws?`<td class="num">${bt(v.stock)}</td><td class="num">${btn(v.covS1)}</td><td class="num">${btn(v.covS2)}</td><td class="num ${v.besS1>0?'neg':''}">${bt(v.besS1)}</td><td class="num ${v.besS2>0?'neg':''}">${bt(v.besS2)}</td>`:''}</tr>`;}
+  h+=`<tr class="tot"><td class="l">TOTAL</td><td class="num">${eur(T.y26)}</td><td class="num">${bt(T.b26)}</td><td class="num">${eur(T.resteCa)}</td><td class="num">${bt(T.resteB)}</td><td></td><td class="num">${eur(T.sim1)}</td><td class="num">${bt(T.sim1b)}</td><td class="num">${eur(T.sim2)}</td><td class="num">${bt(T.sim2b)}</td>${ws?'<td></td><td></td><td></td><td></td><td></td>':''}</tr></tbody></table></div>
+    <div class="legend"><span>Reste 2025 = année complète 2025 − cumul YTD 2025 (période restante). Tendance = CA 2026 YTD / CA 2025 YTD − 1. SIM 1 = réel YTD 2026 + reste 2025. SIM 2 = réel + reste 2025 × (1 + tendance). Couverture = stock 75 cl − bouteilles restant à vendre (rouge si négatif). Besoin de production = MAX(0 ; reste à vendre − stock).</span></div>`;
+  return h;
+}
+function renderPrevCanal(){
+  const f=DATA.fcCanal;const macroOf=cn=>CONS.has(cn)?'VENTE DIRECTE':(cn==='Export'?'EXPORT':'PRO');
+  const zero=()=>({fy:0,y25:0,y26:0,reste:0,sim1:0,sim2:0});
+  const F=cn=>f[cn]||zero();
+  const present=cn=>{const v=f[cn];return !!v&&(Math.abs(v.fy)>0.5||Math.abs(v.y25)>0.5||Math.abs(v.y26)>0.5);};
+  const sum=names=>{const st=zero();for(const cn of names){const v=F(cn);for(const k in st)st[k]+=v[k];}return st;};
+  const tagOf=cn=>{const v=F(cn);return (v.fy>0&&v.y26<=0&&v.y25<=0)?' <span style="color:var(--muted);font-size:11px">(2025 uniquement)</span>':((v.fy<=0&&v.y26>0)?' <span style="color:var(--muted);font-size:11px">(nouveau)</span>':'');};
+  const row=(name,v,cls,tag)=>{const warn=v.reste<0?' ⚠':'';
+    return `<tr class="${cls||''}"><td class="l">${name}${tag||''}${warn}</td><td class="num">${eur0(v.fy)}</td><td class="num">${eur0(v.y25)}</td><td class="num">${eur0(v.y26)}</td><td class="num ${v.reste<0?'neg':''}">${eur0(v.reste)}</td><td class="num">${eur0(v.sim1)}</td><td class="num">${eur0(v.sim2)}</td></tr>`;};
+  const known=new Set([...BLOC_SG1,...BLOC_MISC,...BLOC_CED,...BLOC_CONSO,'Export']);
+  const sg1=BLOC_SG1.filter(present),misc=BLOC_MISC.filter(present),ced=BLOC_CED.filter(present),conso=BLOC_CONSO.filter(present);
+  const otherPro=Object.keys(f).filter(cn=>macroOf(cn)==='PRO'&&!known.has(cn)&&present(cn));
+  const exp=Object.keys(f).filter(cn=>macroOf(cn)==='EXPORT'&&present(cn));
+  let h=`<div class="tw"><table><thead><tr><th class="l">Canal</th><th>FY 2025</th><th>YTD 2025</th><th>YTD 2026</th><th>Reste 2025</th><th>SIM 1</th><th>SIM 2</th></tr></thead><tbody>`;
+  let G=zero();
+  h+=`<tr class="macro"><td colspan="7">PRO</td></tr>`;
+  sg1.forEach(cn=>h+=row(cn,F(cn),'',tagOf(cn)));
+  h+=row('∑  Sous-total Alpilles direct + Agapes + Agapes **',sum(sg1),'sub');
+  [...misc,...otherPro].forEach(cn=>h+=row(cn,F(cn),'',tagOf(cn)));
+  ced.forEach(cn=>h+=row(cn,F(cn),'',tagOf(cn)));
+  h+=row('∑  Sous-total Clients en Direct',sum(ced),'sub');
+  h+=row('∑  Sous-total Autres PRO',sum([...misc,...otherPro,...ced]),'sub');
+  const proT=sum([...sg1,...misc,...otherPro,...ced]);h+=row('TOTAL PRO',proT,'sub');for(const k in G)G[k]+=proT[k];
+  h+=`<tr class="macro"><td colspan="7">Consommateurs</td></tr>`;
+  conso.forEach(cn=>h+=row(cn,F(cn),'',tagOf(cn)));
+  const coT=sum(conso);h+=row('Sous-total Consommateurs',coT,'sub');for(const k in G)G[k]+=coT[k];
+  h+=`<tr class="macro"><td colspan="7">Export</td></tr>`;
+  exp.forEach(cn=>h+=row(cn,F(cn),'',tagOf(cn)));
+  const exT=sum(exp);h+=row('Sous-total Export',exT,'sub');for(const k in G)G[k]+=exT[k];
+  h+=row('TOTAL GÉNÉRAL',G,'tot')+`</tbody></table></div>
+    <div class="legend"><span>Détail par canal, avec sous-totaux <b>Alpilles + Agapes</b>, <b>Clients en Direct</b> et <b>Autres PRO</b>. SIM 1 = YTD 2026 + reste 2025 · SIM 2 pondéré par la tendance. ⚠ = « reste » négatif · <b>(2025 uniquement)</b> = canal disparu en 2026 · <b>(nouveau)</b> = apparu en 2026. Le TOTAL réconcilie avec la prévision par cuvée.</span></div>`;
+  return h;
+}
+const BLOC_SG1=['Alpilles direct','Les Agapes (Alpilles)','Les Agapes (Alpilles) **'];
+const BLOC_MISC=['Arom Vins','Le Casier à vins','Les Agapes (Hors Alpilles)','Terroirs et vins nobles','La Carafe Bleue (13)','Promo'];
+const BLOC_CED=['Clients en Direct','Clients en Direct 06','Clients en Direct 13','Clients en Direct 84'];
+const BLOC_CONSO=['Caveau','Caveau Pro.','Site/Mail','Pas de représentant'];
+function budgetRows(){
+  const b=DATA.budget||{},f=DATA.fcCanal||{};
+  const B=cn=>b[cn]!=null?b[cn]:null;
+  const F=cn=>f[cn]||{fy:0,sim1:0,sim2:0,y26:0};
+  const present=cn=>B(cn)!=null||Math.abs(F(cn).fy)>0.5||Math.abs(F(cn).sim1)>0.5||Math.abs(F(cn).y26)>0.5;
+  const calc=names=>{let bud=0,hb=false,fy=0,sim1=0,sim2=0;for(const cn of names){const bd=B(cn);if(bd!=null){bud+=bd;hb=true;}const v=F(cn);fy+=v.fy;sim1+=v.sim1;sim2+=v.sim2;}
+    let ec=null,ep=null,feu;
+    if(!hb){feu=Math.abs(sim1)>0.5?'Hors budget':'—';}
+    else if(sim1<=0){feu='Sans base';ec=bud;}
+    else{ec=bud-sim1;ep=ec/sim1;feu=ep<=0.10?'Atteignable':ep<=0.25?'Tendu':'Critique';}
+    return {bud:hb?bud:null,fy,sim1,sim2,ec,ep,feu};};
+  const R=[];const line=(label,names,type,note)=>R.push({label,type:type||'line',note,...calc(names)});
+  const misc=BLOC_MISC.filter(present),ced=BLOC_CED.filter(present),conso=BLOC_CONSO.filter(present);
+  R.push({label:'PRO',type:'macro'});
+  R.push({label:'Bloc Alpilles direct + Agapes (Alpilles) + Agapes **',type:'line',note:'⚠ transferts depuis Agapes (pas de CA nouveau)',noteInFeu:true,...calc(BLOC_SG1)});
+  misc.forEach(cn=>line(cn,[cn]));
+  ced.forEach(cn=>line(cn,[cn]));
+  line('Sous-total Clients en Direct',ced,'sub');
+  line('Sous-total Autres PRO',[...misc,...ced],'sub');
+  line('TOTAL PRO',[...BLOC_SG1,...misc,...ced],'sub');
+  R.push({label:'Canaux consommateurs',type:'macro'});
+  conso.forEach(cn=>line(cn,[cn]));
+  line('TOTAL Canaux consommateurs',conso,'sub');
+  R.push({label:'Export',type:'macro'});
+  line('Export (+ Primeurs)',['Export'],'line');
+  line('TOTAL Export',['Export'],'sub');
+  const nb=B('Nouveaux (non affecté)');
+  if(nb!=null)R.push({label:'Nouveaux (clients à acquérir)',type:'line',note:'',bud:nb,fy:0,sim1:0,sim2:0,ec:null,ep:null,feu:'Sans base'});
+  const allReal=[...BLOC_SG1,...misc,...ced,...conso,'Export'].filter(present);
+  const g=calc(allReal);const totBud=(g.bud||0)+(nb||0);const ec=totBud-g.sim1,ep=g.sim1>0?ec/g.sim1:null;
+  R.push({label:'TOTAL GÉNÉRAL',type:'tot',bud:totBud,fy:g.fy,sim1:g.sim1,sim2:g.sim2,ec,ep,feu:ep==null?'—':ep<=0.10?'Atteignable':ep<=0.25?'Tendu':'Critique'});
+  return R;
+}
+function renderBudget(){
+  const R=budgetRows();const chipCls={'Atteignable':'nouv','Tendu':'cro','Critique':'perdu','Hors budget':'sta','Sans base':'sta'};
+  let h=`<div class="tw"><table><thead><tr><th class="l">Canal</th><th>Budget 2026</th><th>Réel 2025</th><th>SIM 1</th><th>SIM 2</th><th>Écart Budget−SIM 1</th><th>Écart %</th><th>Feu</th></tr></thead><tbody>`;
+  for(const r of R){
+    if(r.type==='macro'){h+=`<tr class="macro"><td colspan="8">${r.label}</td></tr>`;continue;}
+    const note=(r.note&&!r.noteInFeu)?` <span style="color:var(--muted);font-size:11px">${r.note}</span>`:'';
+    const ecTxt=r.ec!=null?((r.ec>=0?'+':'')+Math.round(r.ec).toLocaleString('fr-FR')+' €'):'—';
+    const epTxt=r.ep!=null?pct(r.ep):'—';
+    const chip=r.noteInFeu?`<span style="color:var(--muted);font-size:11px">${r.note}</span>`:(chipCls[r.feu]?`<span class="chip ${chipCls[r.feu]}">${r.feu}</span>`:(r.feu||'—'));
+    h+=`<tr class="${r.type==='tot'?'tot':(r.type==='sub'?'sub':'')}"><td class="l">${r.label}${note}</td><td class="num">${r.bud!=null?eur0(r.bud):'—'}</td><td class="num">${eur0(r.fy)}</td><td class="num">${eur0(r.sim1)}</td><td class="num">${eur0(r.sim2)}</td><td class="num ${r.ec!=null?sign(-r.ec):''}">${ecTxt}</td><td class="num ${r.ep!=null?sign(-r.ep):''}">${epTxt}</td><td>${chip}</td></tr>`;
+  }
+  h+=`</tbody></table></div><div class="legend"><span>Écart = Budget − SIM 1 (positif = budget au-dessus du réalisable). <span class="chip nouv">Atteignable</span> ≤ +10 % · <span class="chip cro">Tendu</span> +10→+25 % · <span class="chip perdu">Critique</span> &gt; +25 % · <span class="chip sta">Hors budget</span> = canal sans budget · <span class="chip sta">Sans base</span> = pas de réel 2025 (clients à acquérir). L'Export inclut les primeurs ; total budget « Général » 555 845 € (~+1,9 k€ d'imputation des primeurs).</span></div>`;
+  return h;
+}
+
+/* ============ Export Excel ============ */
+function exportExcel(){
+  const wb=XLSX.utils.book_new();const add=(aoa,name)=>XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(aoa),name.slice(0,31));
+  if(DATA.clients){
+    const cl=DATA.clients;const mo={PRO:0,'VENTE DIRECTE':1,EXPORT:2};
+    const noteOf=c=>c.cat==='Nouveau'?'Nouveau client 2026 — absent de tous les canaux en 2025':(c.note?'consolidé échange':'');
+    const dc=[['Macro','Canal (2026)','Client','CA HT 2025','CA HT 2026','Δ €','Δ %','Catégorie','Notes']];
+    cl.slice().sort((a,b)=>mo[a.macro]-mo[b.macro]||a.canal.localeCompare(b.canal)||b.ca26-a.ca26).forEach(c=>{const d=c.ca26-c.ca25;dc.push([c.macro,c.canal,c.client,r2(c.ca25),r2(c.ca26),r2(d),c.ca25>0?r2(d/c.ca25):'n/d',c.cat,noteOf(c)]);});
+    add(dc,'Données complètes');
+  }
+  if(DATA.cuvees){const a=[['Cuvée','Couleur','CA N-1','CA N','Δ €','Btes N-1','Btes N']];
+    Object.entries(DATA.cuvees).sort((x,y)=>y[1].ca26-x[1].ca26).forEach(([cu,v])=>a.push([cu,v.color,r2(v.ca25),r2(v.ca26),r2(v.ca26-v.ca25),v.btes25,v.btes26]));add(a,'Ventes par cuvée');}
+  if(DATA.cuveesRep){const R=DATA.cuveesRep;const canaux=Object.keys(R);
+    const head=['Canal',...CUVEES.map(c=>c.charAt(0)+c.slice(1).toLowerCase()),'Total N'];const a=[head];
+    const tot=Array(CUVEES.length).fill(0);let gt=0;
+    canaux.forEach(cn=>{const row=[cn];let rt=0;CUVEES.forEach((c,i)=>{const v=R[cn][c]?R[cn][c].caN:0;row.push(r2(v));tot[i]+=v;rt+=v;});row.push(r2(rt));gt+=rt;a.push(row);});
+    a.push(['TOTAL',...tot.map(r2),r2(gt)]);add(a,'Cuvée x canal');}
+  if(DATA.ventes){const V=DATA.ventes;const y25=V.years.q25||'2025',y26=V.years.q26||'2026';
+    const a=[['Cuvée','Millésime','Client','Qté '+y25,'Qté '+y26,'Delta','Action']];
+    for(const cu of PHARES){const C=V.cuvees[cu];if(!C)continue;
+      Object.keys(C.mils).filter(m=>/^\d{4}$/.test(m)).sort().forEach(m=>{
+        const cls=Object.entries(C.mils[m].clients).map(([c,q])=>({c,q25:q.q25,q26:q.q26})).filter(o=>o.q25||o.q26).sort((x,y)=>Math.max(y.q25,y.q26)-Math.max(x.q25,x.q26));
+        cls.forEach(o=>{const d=o.q26-o.q25;const act=o.q25>0&&o.q26<=0?'À relancer':(o.q25<=0&&o.q26>0?'Nouveau':(o.q26<o.q25?'En baisse':'Fidèle'));a.push([cap(cu),m,o.c,o.q25,o.q26,d,act]);});});}
+    add(a,'Cuvées de garde');}
+  if(DATA.relances){const R=DATA.relances;const a=[['Encours par tranche de retard (30 j net) · édition '+R.ref],[],['Tranche de retard','Factures','Montant']];
+    R.tranches.forEach(b=>a.push([b.lab,b.count,r2(b.total)]));a.push(['TOTAL ÉCHU (hors non échus)',R.buckets.reduce((s,b)=>s+b.count,0),r2(R.total)]);
+    a.push([],['Client','Encours échu','Retard max (mois)']);
+    Object.entries(R.byC).sort((x,y)=>y[1].total-x[1].total).forEach(([c,v])=>a.push([c,r2(v.total),Math.round(v.oldest/30)]));
+    add(a,'Encours & relances');}
+  if(DATA.fidelite){const CF=fidCompute();if(CF){const {years,list}=CF;
+    const a=[['FIDÉLITÉ — cuvées domaine, réalisé net · '+years[0]+'→'+years[years.length-1]],[],['Segmentation récence × fréquence'],['Macro','Segment','Clients','%','CA période','CA moyen']];
+    ['Vente directe','PRO'].forEach(macro=>{const sub=list.filter(c=>c.macro===macro);
+      FID_SEGS.forEach(s=>{const g=sub.filter(c=>c.seg===s);const ca=g.reduce((x,c)=>x+c.caPer,0);a.push([macro,s,g.length,sub.length?Math.round(g.length/sub.length*100):0,r2(ca),r2(g.length?ca/g.length:0)]);});});
+    a.push([],['À réactiver (silencieux récemment) — trié par CA historique'],['Client','Type','Pays','Ville','CA historique','Fréquence (années)']);
+    list.filter(c=>c.seg==='À réactiver').sort((x,y)=>y.caPer-x.caPer).forEach(c=>a.push([c.name,c.macro,c.pays,c.ville,r2(c.caPer),c.freq]));
+    const G=fidGeo();
+    if(G){a.push([],['Répartition géographique des particuliers'+(G.hasCP?' (pays → département → ville)':' (pays → ville)')],['Pays','Département','Ville / CP','Clients','CA cumulé']);
+      Object.entries(G.C).map(([k,v])=>({k,...v})).sort((x,y)=>y.ca-x.ca).forEach(c=>{
+        if(c.k==='France'&&G.hasCP){Object.entries(c.depts).map(([d,v])=>({d,...v})).sort((x,y)=>y.ca-x.ca).forEach(dp=>{
+          const dl=dp.d==='__none'?'Département inconnu':(DEPT_NAMES[dp.d]?dp.d+' — '+DEPT_NAMES[dp.d]:'Dépt '+dp.d);
+          Object.entries(dp.leaves).map(([l,v])=>({l,...v})).sort((x,y)=>y.ca-x.ca).forEach(lf=>a.push([c.k,dl,lf.l,lf.n,r2(lf.ca)]));});
+        } else {Object.entries(c.leaves).map(([l,v])=>({l,...v})).sort((x,y)=>y.ca-x.ca).forEach(lf=>a.push([c.k,'',lf.l,lf.n,r2(lf.ca)]));}
+      });
+      if(G.noLoc.n)a.push(['Non renseigné','','',G.noLoc.n,r2(G.noLoc.ca)]);
+    }
+    add(a,'Fidélité');}}
+  if(DATA.fidelite){const H=histData();if(H){const a=[['Historique CA vin (cuvées domaine, réalisé net)'],[],['Année','PRO','Vente directe','Total']];
+    H.years.forEach(y=>{const b=H.by[y];a.push([y,r2(b.pro),r2(b.part),r2(b.pro+b.part)]);});add(a,'Historique CA vin');}}
+  if(DATA.encours){const a=[['Ancienneté','Montant'],['+120 j',r2(DATA.encours.agg?.[0])],['91-120 j',r2(DATA.encours.agg?.[1])],['61-90 j',r2(DATA.encours.agg?.[2])],['31-60 j',r2(DATA.encours.agg?.[3])],['0-30 j',r2(DATA.encours.agg?.[4])],['Non échu',r2(DATA.encours.agg?.[5])],['TOTAL',r2(DATA.encours.agg?.[6])],[],['Client','Encours']];
+    DATA.encours.clients.slice().sort((x,y)=>y.total-x.total).forEach(c=>a.push([c.label,r2(c.total)]));add(a,'Encours');}
+  if(DATA.carnet){const a=[['Carnet de commandes'],['Total HT',r2(DATA.carnet.total)],['Eq. 75',DATA.carnet.eq75],[],['Cuvée','Montant']];Object.entries(DATA.carnet.byCuvee).forEach(([c,v])=>a.push([c,r2(v)]));add(a,'Carnet');}
+  if(DATA.resa){const a=[['Réservations'],['Total HT',r2(DATA.resa.total)],['Eq. 75',DATA.resa.eq75],[],['Cuvée','Montant']];Object.entries(DATA.resa.byCuvee).forEach(([c,v])=>a.push([c,r2(v)]));add(a,'Réservations');}
+  if(DATA.huile)add([['Huile d\'olive'],['CA N-1',r2(DATA.huile.ca25)],['CA N',r2(DATA.huile.ca26)],['Δ',r2(DATA.huile.ca26-DATA.huile.ca25)]],'Huile');
+  if(DATA.stock){const a=[['Cuvée','Couleur','Stock 75 cl']];Object.entries(DATA.stock).sort().forEach(([c,v])=>a.push([c,v.color,v.dispo]));add(a,'Stock 75 cl');}
+  if(DATA.stockho){const a=[['Conditionnement','Millésime','Stock']];DATA.stockho.forEach(x=>a.push([x.conditionnement,x.millesime,x.qty]));add(a,'Stock huile');}
+  // ----- Non renouvelés (modèle fidèle) -----
+  if(DATA.clients){
+    const nr=DATA.clients.filter(c=>c.cat==='Non renouvelé');
+    const nrRow=c=>['',c.canal,c.client,r2(c.ca25),0,r2(-c.ca25),-1,''];
+    const pro=[[],[],['Macro','Canal (2026)','Client','CA HT 2025','CA HT 2026','Δ €','Δ %','Notes'],['  ▶    PRO']];
+    nr.filter(c=>c.macro==='PRO').sort((x,y)=>y.ca25-x.ca25).forEach(c=>pro.push(nrRow(c)));
+    add(pro,'NR — PRO');
+    const co=[['Non renouvelés — Consommateurs + Export (2025→2026)'],[],['Macro','Canal (2026)','Client','CA HT 2025','CA HT 2026','Δ €','Δ %','Notes'],['  ▶    CONSOMMATEURS']];
+    nr.filter(c=>c.macro==='VENTE DIRECTE').sort((x,y)=>y.ca25-x.ca25).forEach(c=>co.push(nrRow(c)));
+    co.push(['  ▶    EXPORT']);
+    nr.filter(c=>c.macro==='EXPORT').sort((x,y)=>y.ca25-x.ca25).forEach(c=>co.push(nrRow(c)));
+    add(co,'NR — Consommateurs');
+  }
+  const jY=DATA.periods?daysBetween(DATA.periods.curStart,DATA.periods.curEnd):191;const fac=365/jY;
+  if(DATA.fcCuvee){const a=[
+    ['Cuvée','Vendu réel YTD 2026','','Historique reste 2025','','Tendance 2026/2025','SIM 1 : réel + reste 2025','','SIM 2 : réel + reste × tend.','','Stock 75 cl dispo.','Couverture (Btes)','','Besoin prod. (Btes)',''],
+    ['','CA HT','Btes','CA HT','Btes','','CA HT','Btes','CA HT','Btes','','SIM 1','SIM 2','SIM 1','SIM 2']];
+    Object.entries(DATA.fcCuvee).sort((x,y)=>y[1].sim1-x[1].sim1).forEach(([cu,v])=>a.push([cu,r2(v.y26),v.b26,r2(v.resteCa),v.resteB,v.tend!=null?r2(v.tend):'n/d',r2(v.sim1),v.sim1b,r2(v.sim2),v.sim2b,v.stock,v.covS1,v.covS2,v.besS1,v.besS2]));
+    add(a,'Prévision par cuvée');}
+  else if(DATA.cuvees){const a=[['Cuvée','CA cumulé N','Projection annuelle*','Btes N','Proj. btes*']];
+    Object.entries(DATA.cuvees).sort((x,y)=>y[1].ca26-x[1].ca26).forEach(([cu,v])=>a.push([cu,r2(v.ca26),r2(v.ca26*fac),v.btes26,Math.round(v.btes26*fac)]));
+    a.push([],[`* extrapolation au rythme observé sur ${jY} jours (année 2025 non fournie)`]);add(a,'Prévision par cuvée');}
+  if(DATA.fcCanal){const ents=Object.entries(DATA.fcCanal).sort((x,y)=>y[1].sim1-x[1].sim1);
+    const a=[['Canal','FY 2025','YTD 2025','YTD 2026','Reste 2025','SIM 1','SIM 2']];
+    ents.forEach(([cn,v])=>a.push([cn,r2(v.fy),r2(v.y25),r2(v.y26),r2(v.reste),r2(v.sim1),r2(v.sim2)]));add(a,'Prévision par canal');
+    if(DATA.budget){const R=budgetRows();const b=[['Abbaye de Pierredon — Budget 2026 vs Prévision'],[],['Canal','Budget 2026','Réel 2025','SIM 1','SIM 2','Écart Budget-SIM1 €','Écart %','Feu']];
+      for(const r of R){if(r.type==='macro'){b.push([r.label]);continue;}b.push([r.label,r.bud!=null?r2(r.bud):'',r2(r.fy),r2(r.sim1),r2(r.sim2),r.ec!=null?r2(r.ec):'',r.ep!=null?r2(r.ep):'',r.noteInFeu?r.note:r.feu]);}
+      add(b,'Budget vs Prévision');}}
+  else if(DATA.clients){const byC={};DATA.clients.forEach(c=>{(byC[c.canal]=byC[c.canal]||{ca25:0,ca26:0}).ca25+=c.ca25;byC[c.canal].ca26+=c.ca26;});
+    const ents=Object.entries(byC).sort((x,y)=>y[1].ca26-x[1].ca26);
+    const a=[['Canal','CA cumulé N','Projection annuelle*','CA N-1 cumulé']];
+    ents.forEach(([cn,v])=>a.push([cn,r2(v.ca26),r2(v.ca26*fac),r2(v.ca25)]));
+    a.push([],['* extrapolation indicative (année 2025 non fournie)']);add(a,'Prévision par canal');}
+
+  XLSX.writeFile(wb,'Tableau_de_bord_Abbaye_de_Pierredon.xlsx');
+}
+</script>
+
+
+</body></html>
